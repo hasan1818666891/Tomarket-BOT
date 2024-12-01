@@ -1,6 +1,7 @@
 import asyncio
 import json
 import io
+import os
 import zlib
 import gzip
 import brotli
