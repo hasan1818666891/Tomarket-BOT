@@ -16,18 +16,6 @@ from aiocache import Cache, cached
 from tonsdk.contract.wallet import Wallets, WalletVersionEnum
 
 
-def error_handler(func: Callable):
-    @functools.wraps(func)
-    async def wrapper(*args, **kwargs):
-        try:
-            return await func(*args, **kwargs)
-        except Exception as e:
-            logger.error(f"Error in {func.__name__}: {e}", exc_info=True)
-            await asyncio.sleep(1)
-            return None
-    return wrapper
-
-@error_handler
 async def extract_json_from_response(response):
     try:
         response_bytes = await response.read()
@@ -46,7 +34,6 @@ async def extract_json_from_response(response):
         logger.warning(f"Error processing response: {e}")
         return await response.json()
 
-@error_handler
 @cached(ttl=3600, cache=Cache.MEMORY)  # Cache combo.json file for 1 hour
 async def get_combo() -> dict:
     url = 'https://raw.githubusercontent.com/boytegar/TomarketBOT/refs/heads/master/combo.json'
@@ -63,15 +50,13 @@ async def get_combo() -> dict:
         logger.error(f"Error fetching combo: {e}")
         return {}
 
-@error_handler
-async def get_param() -> str:
+def get_param() -> str:
     parts = [
         str(0 * 1), str(0 * 1), str(0 * 1), str(0 * 1),
         chr(65), str(4 * 1), chr(99), chr(87)
     ]
     return ''.join(parts)
 
-@error_handler
 async def generate_ton_wallet(session_name: str) -> dict | bool:
     try:
         # Create a new wallet using WalletVersionEnum.v4r2
@@ -96,7 +81,6 @@ async def generate_ton_wallet(session_name: str) -> dict | bool:
         await asyncio.sleep(delay=3)
         return None, {}
 
-@error_handler
 async def configure_wallet(
     tg_id: str, 
     tg_username: str, 
@@ -129,7 +113,6 @@ async def configure_wallet(
         await asyncio.sleep(delay=3)
         return False
 
-@error_handler
 async def is_expired(token: str) -> bool:
     if token is None or isinstance(token, bool):
         return True
