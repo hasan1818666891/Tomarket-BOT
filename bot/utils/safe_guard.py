@@ -63,7 +63,7 @@ async def get_base_api(url):
 async def check_base_url(session_name):
     
     if settings.ADVANCED_ANTI_DETECTION:  
-        logger.info(f"{session_name} | 🕵️‍♂️ Processing advanced detection...")
+        logger.info(f"{session_name} | 🔎 Processing advance detection...")
         return await advance_detection(BASE_PAGE_URL, DETECTION_CONFIG_URL)
     else:
         main_js_formats = await fetch_js_paths(BASE_PAGE_URL)
@@ -154,7 +154,7 @@ async def advance_detection(base_url, config_url):
             logger.warning(f"Mismatch for file <y>{file_name}</y>: expected <e>{expected_time}</e>, got <e>{actual_time}</e>")
             return False
 
-    logger.info("<g>🛡️ Bot is safe to run</g> ✅")
+    logger.info("<g>Bot is safe to run</g> ✅")
     return True
 
 
