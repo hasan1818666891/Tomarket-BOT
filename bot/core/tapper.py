@@ -35,7 +35,7 @@ from bot.exceptions import InvalidSession
 from bot.core.agents import extract_chrome_version
 from bot.core.registrator import get_tg_client
 from bot.utils.safe_guard import check_base_url
-from bot.utils.helper import get_combo, error_handler, extract_json_from_response, get_param, is_expired, configure_wallet, convert_utc_to_local
+from bot.utils.helper import get_combo, extract_json_from_response, get_param, is_expired, configure_wallet, convert_utc_to_local
 
 BASE_API = "https://api-web.tomarket.ai/tomarket-game/v1"
 
@@ -108,7 +108,7 @@ class Tapper:
                 self.peer = await self.resolve_peer_with_retry(chat_id=self.bot_username, username=self.bot_username)
                 ref_id = str(settings.REF_ID)
                 ref_id = ref_id.spilt('-')[1] if "-" in ref_id else ref_id
-                self.refer_id = choices([ref_id, await get_param()], weights=[70, 30], k=1)[0] # this is sensitive data don’t change it (if ydk)
+                self.refer_id = choices([ref_id, get_param()], weights=[70, 30], k=1)[0] # this is sensitive data don’t change it (if ydk)
                 web_view = await self.tg_client.invoke(
                     RequestAppWebView(
                         peer = self.peer,
@@ -153,8 +153,7 @@ class Tapper:
 
         data_dict = {part.split('=')[0]: unquote(part.split('=')[1]) for part in tg_web_data_parts}
         return f"user={quote(data_dict['user'])}&chat_instance={data_dict['chat_instance']}&chat_type={data_dict['chat_type']}&start_param={data_dict['start_param']}&auth_date={data_dict['auth_date']}&signature={data_dict['signature']}&hash={data_dict['hash']}"
-        
-    
+
     async def check_proxy(
         self, 
         http_client: CloudflareScraper, 
@@ -170,7 +169,6 @@ class Tapper:
         except Exception as error:
             logger.error(f"<light-yellow>{self.session_name}</light-yellow> | Proxy: {proxy} | Error: {error}")
 
-    
     async def _parse_proxy(
         self, 
         proxy: str | None
@@ -186,8 +184,7 @@ class Tapper:
                 'password': parsed.password
             }
         return None
-        
-    
+
     async def resolve_peer_with_retry(
         self, 
         chat_id: int | str, 
@@ -223,7 +220,6 @@ class Tapper:
 
         return peer
 
-    
     async def get_dialog(
         self, 
         username: str
@@ -235,7 +231,6 @@ class Tapper:
                 break
         return peer_found
 
-    
     async def mute_and_archive_chat(
         self, 
         chat, 
@@ -260,7 +255,6 @@ class Tapper:
         except RPCError as e:
             logger.error(f"<light-yellow>{self.session_name}</light-yellow> | Error muting or archiving chat <g>{chat.title}</g>: {e}", exc_info=True)
 
-    
     async def join_tg_channel(
         self, 
         link: str
@@ -309,7 +303,6 @@ class Tapper:
                 logger.error(f"<light-yellow>{self.session_name}</light-yellow> | Error while join tg channel: {error} {link}")
                 await asyncio.sleep(delay=3)
 
-    
     async def change_name(
         self, 
         symbol: str
@@ -326,13 +319,11 @@ class Tapper:
                     await self.tg_client.update_profile(first_name=changed_name)
                     logger.info(f"{self.session_name} | First name changed <g>{first_name}</g> to <g>{changed_name}</g>")
                     await asyncio.sleep(delay=randint(20, 30))
-
                 return True
             except Exception as error:
                 logger.error(f"<light-yellow>{self.session_name}</light-yellow> | Error while changing tg name : {error}")
                 return False
 
-    
     async def login(
         self, 
         http_client: CloudflareScraper, 
@@ -366,13 +357,10 @@ class Tapper:
                         logger.warning(f"{self.session_name} | Get token failed: <r>{response.status}</r>, retying... (<g>{retries}</g>/<r>{max_retries}</r>)")
                         await asyncio.sleep(delay)
                         delay *= 2
-            return False
-
         except Exception as e:
             logger.warning(f"{self.session_name} | Unknown error while trying to get token: {e}", exc_info=True)
-            return False
+        return False
 
-    
     async def claim_daily(
         self, 
         http_client: CloudflareScraper,
@@ -410,11 +398,10 @@ class Tapper:
                         logger.warning(f"{self.session_name} | claim daily failed: <r>{response.status}</r>, retying... (<g>{retries}</g>/<r>{max_retries}</r>)")
                         await asyncio.sleep(delay)
                         delay *= 2
-            return False
         except Exception as e:
             logger.warning(f"{self.session_name} | Unknown error while trying to claim daily: {e}", exc_info=True)
+        return False
 
-    
     async def wallet_task(
         self, 
         http_client: CloudflareScraper,
@@ -450,10 +437,8 @@ class Tapper:
                         await asyncio.sleep(delay)
                         delay *= 2
             return False
-
         except Exception as e:
             logger.warning(f"{self.session_name} | Unknown error while trying to do wallet task: {e}", exc_info=True)
-    
     
     async def add_wallet(
         self, 
@@ -482,11 +467,9 @@ class Tapper:
                         logger.warning(f"{self.session_name} | submitting wallet failed: <r>{response.status}</r>, retying... (<g>{retries}</g>/<r>{max_retries}</r>)")
                         await asyncio.sleep(delay)
                         delay *= 2
-            return False
         except Exception as e:
             logger.warning(f"{self.session_name} | Unknown error while trying to add new wallet : {e}", exc_info=True)
-            return False
-    
+        return False
     
     async def get_balance(
         self, 
@@ -503,19 +486,17 @@ class Tapper:
                     await asyncio.sleep(delay=3)
                     if response.status == 200:
                         response_json = await extract_json_from_response(response=response)
-                        data = response_json.get('data', None)
+                        data = response_json.get('data', {})
                         return data
                     else:
                         retries += 1
                         logger.warning(f"{self.session_name} | getting balance failed: <r>{response.status}</r>, retying... (<g>{retries}</g>/<r>{max_retries}</r>)")
                         await asyncio.sleep(delay)
                         delay *= 2
-            return False
         except Exception as e:
             logger.warning(f"{self.session_name} | Unknown error while getting balance : {e}", exc_info=True)
-            return False
-    
-    
+        return False
+
     async def farm_info(
         self, 
         http_client: CloudflareScraper,
@@ -541,12 +522,10 @@ class Tapper:
                         logger.warning(f"{self.session_name} | getting farm info failed: <r>{response.status}</r>, retying... (<g>{retries}</g>/<r>{max_retries}</r>)")
                         await asyncio.sleep(delay)
                         delay *= 2
-            return False
         except Exception as e:
             logger.warning(f"{self.session_name} | Unknown error while getting farm info : {e}", exc_info=True)
-            return False
-    
-    
+        return False
+
     async def claim_farm(
         self, 
         http_client: CloudflareScraper,
@@ -578,12 +557,10 @@ class Tapper:
                         logger.warning(f"{self.session_name} | claiming farm failed: <r>{response.status}</r>, retying... (<g>{retries}</g>/<r>{max_retries}</r>)")
                         await asyncio.sleep(delay)
                         delay *= 2
-            return False
         except Exception as e:
             logger.warning(f"{self.session_name} | Unknown error while claiming farm : {e}", exc_info=True)
-            return False
-    
-    
+        return False
+
     async def start_farm(
         self, 
         http_client: CloudflareScraper,
@@ -612,12 +589,10 @@ class Tapper:
                         logger.warning(f"{self.session_name} | Starting farm failed: <r>{response.status}</r>, retying... (<g>{retries}</g>/<r>{max_retries}</r>)")
                         await asyncio.sleep(delay)
                         delay *= 2
-            return False
         except Exception as e:
             logger.warning(f"{self.session_name} | Unknown error while start farming : {e}", exc_info=True)
-            return False
-    
-    
+        return False
+
     async def task_list(
         self, 
         http_client: CloudflareScraper, 
@@ -645,13 +620,10 @@ class Tapper:
                         logger.warning(f"{self.session_name} | Getting task list failed: <r>{response.status}</r>, retying... (<g>{retries}</g>/<r>{max_retries}</r>)")
                         await asyncio.sleep(delay)
                         delay *= 2
-            return False
         except Exception as e:
-            
             logger.warning(f"{self.session_name} | Unknown error while getting task list : {e}", exc_info=True)
-            return False
-    
-    
+        return False
+
     async def start_task(
         self, 
         http_client: CloudflareScraper, 
@@ -680,12 +652,10 @@ class Tapper:
                         logger.warning(f"{self.session_name} | Starting task failed: <r>{response.status}</r>, retying... (<g>{retries}</g>/<r>{max_retries}</r>)")
                         await asyncio.sleep(delay)
                         delay *= 2
-            return False
         except Exception as e:
             logger.warning(f"{self.session_name} | Unknown error while start task: {e}", exc_info=True)
-            return False
-    
-    
+        return False
+
     async def check_task(
         self, 
         http_client: CloudflareScraper, 
@@ -705,7 +675,7 @@ class Tapper:
                 async with self.lock:
                     await http_client.options(task_check_api, headers=options_headers(method="POST", kwarg=http_client.headers))
                     response = await http_client.post(task_check_api, json=payload, timeout=ClientTimeout(20))
-                    await asyncio.sleep(delay=4)
+                    await asyncio.sleep(delay=5)
                     if response.status == 200:
                         response_json = await extract_json_from_response(response=response)
                         data = response_json.get('data', {})
@@ -720,12 +690,10 @@ class Tapper:
                         logger.warning(f"{self.session_name} | Checking task failed: <r>{response.status}</r>, retying... (<g>{retries}</g>/<r>{max_retries}</r>)")
                         await asyncio.sleep(delay)
                         delay *= 2
-                return False
         except Exception as e:
             logger.warning(f"{self.session_name} | Unknown error while checking task : {e}", exc_info=True)
-            return False
-    
-    
+        return False
+
     async def claim_task(
         self, 
         http_client: CloudflareScraper, 
@@ -751,12 +719,10 @@ class Tapper:
                         logger.warning(f"{self.session_name} | Claiming task failed: <r>{response.status}</r>, retying... (<g>{retries}</g>/<r>{max_retries}</r>)")
                         await asyncio.sleep(delay)
                         delay *= 2
-            return False
         except Exception as e:
             logger.warning(f"{self.session_name} | Unknown error while claiming task : {e}", exc_info=True)
-            return False
-    
-    
+        return False
+
     async def process_task(
         self, 
         http_client: CloudflareScraper, 
@@ -830,12 +796,10 @@ class Tapper:
                         logger.info(f"{self.session_name} | 🎉 Task <g>{name}</g> claimed successfully | rewarded : <g>+{reward}</g>")
                     else:
                         logger.info(f"{self.session_name} | <y>Task {name} not claimed</y>")
-        
         except Exception as e:
+            traceback.print_exc()
             logger.warning(f"{self.session_name} | Unknown error while processing task : {e}", exc_info=True)
-            return False
-    
-    
+
     async def get_puzzle_task(
         self, 
         http_client: CloudflareScraper, 
@@ -863,13 +827,10 @@ class Tapper:
                         logger.warning(f"{self.session_name} | Getting puzzle task failed: <r>{response.status}</r>, retying... (<g>{retries}</g>/<r>{max_retries}</r>)")
                         await asyncio.sleep(delay)
                         delay *= 2
-                return False
         except Exception as e:
-            
             logger.warning(f"{self.session_name} | Unknown error while getting puzzle task : {e}", exc_info=True)
-            return False
-    
-    
+        return False
+
     async def claim_puzzle_task(
         self, http_client: CloudflareScraper, 
         task_id: int, 
@@ -898,12 +859,10 @@ class Tapper:
                         # logger.debug(f"{self.session_name} | {escape(await response.text())}")
                         await asyncio.sleep(delay)
                         delay *= 2
-                return False
         except Exception as e:
             logger.warning(f"{self.session_name} | Unknown error while claiming puzzle task : {e}", exc_info=True)
-            return False
-            
-    
+        return False
+
     async def solve_puzzle_task(
         self, 
         http_client: CloudflareScraper, 
@@ -955,10 +914,8 @@ class Tapper:
             else:
                 logger.info(f"{self.session_name} | <y>puzzle task not found</y>")
         except Exception as e:
-            
             logger.warning(f"{self.session_name} | Unknown error while processing puzzle task : {e}", exc_info=True)
-    
-    
+
     async def play_game(
         self,
         http_client: CloudflareScraper,
@@ -977,7 +934,7 @@ class Tapper:
                     await asyncio.sleep(delay=3)
                     if response.status == 200:
                         response_json = await extract_json_from_response(response=response)
-                        data = response_json.get('data', None)
+                        data = response_json.get('data', {})
                         return data
                     else:
                         retries += 1
@@ -985,12 +942,10 @@ class Tapper:
                         # logger.debug(f"{self.session_name} | {escape(await response.text())}")
                         await asyncio.sleep(delay)
                         delay *= 2
-            return False
         except Exception as e:
             logger.warning(f"{self.session_name} | Unknown error while starting game: {e}", exc_info=True)
-            return False
-    
-    
+        return False
+
     async def claim_game(
         self,
         http_client: CloudflareScraper,
@@ -1013,19 +968,17 @@ class Tapper:
                     await asyncio.sleep(3)  # Optional delay before checking the response
                     if response.status == 200:
                         response_json = await extract_json_from_response(response=response)
-                        data = response_json.get('data', None)
+                        data = response_json.get('data', {})
                         return data
                     else:
                         retries += 1
                         logger.warning(f"{self.session_name} | claiming game failed: <r>{response.status}</r>, retying... (<g>{retries}</g>/<r>{max_retries}</r>)")
                         await asyncio.sleep(delay)
                         delay *= 2
-            return False
         except Exception as e:
             logger.warning(f"{self.session_name} | Unknown error while claiming game: {e}", exc_info=True)
-            return False
-    
-    
+        return False
+
     async def share_game(
         self, 
         http_client: CloudflareScraper,
@@ -1053,23 +1006,24 @@ class Tapper:
                         logger.warning(f"{self.session_name} | sharing game failed: <r>{response.status}</r>, retying... (<g>{retries}</g>/<r>{max_retries}</r>)")
                         await asyncio.sleep(delay)
                         delay *= 2
-            return False
         except Exception as e:
             logger.warning(f"{self.session_name} | Unknown error while sharing game : {e}", exc_info=True)
-            return False
-    
-    
+        return False
+
     async def process_game(
         self, 
         http_client: CloudflareScraper
     ) -> None:
         try:
-            get_balance = await self.get_balance(http_client=http_client)
-            play_passes = get_balance.get("play_passes", 0)
+            play_passes = 0
             game = randint(
                 settings.GAME_PLAY_EACH_ROUND[0], 
                 settings.GAME_PLAY_EACH_ROUND[1]
             )
+            get_balance = await self.get_balance(http_client=http_client)
+            if get_balance:
+                play_passes = get_balance.get("play_passes", 0)
+
             if play_passes > 0:
                 logger.info(f"{self.session_name} | Randomly selected <c>{game}</c> attempts to play the game.")
             while play_passes > 0 and game > 0:
@@ -1103,11 +1057,8 @@ class Tapper:
                 play_passes -= 1
                 game -= 1
         except Exception as e:
-            
             logger.warning(f"{self.session_name} | Unknown error while processing game : {e}", exc_info=True)
-            return False
-    
-    
+
     async def rank_data(
         self, 
         http_client: CloudflareScraper, 
@@ -1135,13 +1086,10 @@ class Tapper:
                         logger.warning(f"{self.session_name} | Getting rank data failed: <r>{response.status}</r>, retying... (<g>{retries}</g>/<r>{max_retries}</r>)")
                         await asyncio.sleep(delay)
                         delay *= 2
-            return False
         except Exception as e:
-            
             logger.warning(f"{self.session_name} | Unknown error while getting rank data : {e}", exc_info=True)
-            return False
-    
-    
+        return False
+
     async def rank_evaluate(
         self, 
         http_client: CloudflareScraper, 
@@ -1165,12 +1113,10 @@ class Tapper:
                         logger.warning(f"{self.session_name} | evaluating rank failed: <r>{response.status}</r>, retying... (<g>{retries}</g>/<r>{max_retries}</r>)")
                         await asyncio.sleep(delay)
                         delay *= 2
-            return False
         except Exception as e:
             logger.warning(f"{self.session_name} | Unknown error while evaluating rank : {e}", exc_info=True)
-            return False
-    
-    
+        return False
+
     async def rank_create(
         self, 
         http_client: CloudflareScraper, 
@@ -1186,11 +1132,10 @@ class Tapper:
                     await asyncio.sleep(delay=3)
                     if response.status == 200:
                         response_json = await extract_json_from_response(response=response)
-                        data = response_json.get('data', None)
+                        data = response_json.get('data', {})
                         if data and data.get('isCreated'):
                             name = data.get('currentRank', {}).get('name', 'Not found')
                             lvl = data.get('currentRank', {}).get('level', 'Not found')
-                    
                             logger.info(f"{self.session_name} | 🎊 <g>Successfully rank created</g> | rank name: <g>{name}</g> - level: <g>{lvl}</g>")
                             return True
                     else:
@@ -1198,12 +1143,10 @@ class Tapper:
                         logger.warning(f"{self.session_name} | creating rank failed: <r>{response.status}</r>, retying... (<g>{retries}</g>/<r>{max_retries}</r>)")
                         await asyncio.sleep(delay)
                         delay *= 2
-            return False
         except Exception as e:
             logger.warning(f"{self.session_name} | Unknown error while creating rank : {e}", exc_info=True)
-            return False
-    
-    
+        return False
+
     async def create_rank(
         self, 
         http_client: CloudflareScraper
@@ -1215,12 +1158,10 @@ class Tapper:
                 rank_create = await self.rank_create(http_client=http_client)
                 if rank_create:
                     return True
-            return False
         except Exception as e:
             logger.warning(f"{self.session_name} | Unknown error while processing rank creation : {e}", exc_info=True)
-            return False
+        return False
 
-    
     async def show_spin(
         self, 
         http_client: CloudflareScraper, 
@@ -1241,7 +1182,7 @@ class Tapper:
                     await asyncio.sleep(delay=3)
                     if response.status == 200:
                         response_json = await extract_json_from_response(response=response)
-                        data = response_json.get('data', None)
+                        data = response_json.get('data', {})
                         if data:
                             return data.get('show', None)
                     else:
@@ -2254,7 +2195,6 @@ async def run_tapper(tg_client: Client, user_agent: str, proxy: str | None):
 
 async def run_tapper_synchronous(accounts: list[dict]):
     while True:
-
         for account in accounts:
             try:
                 session_name, user_agent, raw_proxy = account.values()
