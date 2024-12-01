@@ -1,0 +1,7 @@
+[
+  {
+    "session_name": "name_example",
+    "user_agent": "Mozilla/5.0 (Linux; Android 9; Samsung SM-G892A) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/118.0.5993.156 Mobile Safari/537.36 Telegram-Android/11.3.4 (Samsung SM-G892A; Android 9; SDK 28; AVERAGE)",
+    "proxy": "type://user:pass:ip:port"
+  }
+]
