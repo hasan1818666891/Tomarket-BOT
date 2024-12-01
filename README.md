@@ -170,6 +170,5 @@ If `AUTO_ADD_WALLET` is enabled, TON wallets are automatically added to accounts
 ]
 ```
 
-### Contacts
-
-Unavailable
+### Contact
+[Join our Telegram Channel](https://t.me/scripts_hub)
