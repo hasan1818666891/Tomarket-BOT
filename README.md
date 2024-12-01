@@ -77,7 +77,7 @@ Ensure you have **Python 3.10** installed.
 
 ### Clone the Repository
 ```shell
-git clone https://github.com/hasan1818666891/Tomarket-BOT
+git clone https://github.com/khondokerXhasan/Tomarket-BOT
 cd Tomarket-BOT
 ```
 
