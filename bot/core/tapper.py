@@ -417,29 +417,17 @@ class Tapper:
                     await asyncio.sleep(delay=3)
                     if response.status == 200:
                         response_json = await extract_json_from_response(response=response)
-                        data = response_json['data']
-                        if data["walletAddress"] == "":
-                            logger.info(f"{self.session_name} | <y>Wallet address not found.</y>")
-                            if settings.AUTO_ADD_WALLET:
-                                tg_id = str(self.tg_account_info.id)
-                                tg_username = str(self.tg_account_info.username) if self.tg_account_info.username else None
-                                wallet_address = await configure_wallet(tg_id=tg_id, tg_username=tg_username, session_name=self.session_name)
-                                if wallet_address:
-                                    submit_wallet = await self.add_wallet(http_client=http_client, wallet_address=wallet_address)
-                                    if submit_wallet:
-                                        logger.info(f"{self.session_name} | 💳 New wallet address <g>{wallet_address}</g> added successfully.")
-                        else:
-                            logger.info(f"{self.session_name} | 💳 Wallet address : <g>{data.get('walletAddress','Not found')}</g>")
-                        return True
+                        data = response_json.get('data', {})
+                        return data
                     else:
                         retries += 1
                         logger.warning(f"{self.session_name} | Get wallet failed: <r>{response.status}</r>, retying... (<g>{retries}</g>/<r>{max_retries}</r>)")
                         await asyncio.sleep(delay)
                         delay *= 2
-            return False
         except Exception as e:
-            logger.warning(f"{self.session_name} | Unknown error while trying to do wallet task: {e}", exc_info=True)
-    
+            logger.warning(f"{self.session_name} | Unknown error while getting wallet task: {e}", exc_info=True)
+        return False
+
     async def add_wallet(
         self, 
         http_client: CloudflareScraper, 
@@ -456,12 +444,16 @@ class Tapper:
                 async with self.lock:
                     await http_client.options(add_wallet_api, headers=options_headers(method="POST", kwarg=http_client.headers))
                     response = await http_client.post(add_wallet_api, json=payload, timeout=ClientTimeout(20))
-                    await asyncio.sleep(delay=3)
+                    await asyncio.sleep(3)
                     if response.status == 200:
                         response_json = await response.json()
-                        data = response_json['data']
+                        data = response_json.get('data',{})
                         if data == "ok":
                             return True
+                        elif response_json.get('status',500) == 500:
+                            message = response_json.get('message')
+                            logger.info(f"{self.session_name} | adding wallet failed, because: <y>{message}<y>")
+                            
                     else:
                         retries += 1
                         logger.warning(f"{self.session_name} | submitting wallet failed: <r>{response.status}</r>, retying... (<g>{retries}</g>/<r>{max_retries}</r>)")
@@ -470,6 +462,29 @@ class Tapper:
         except Exception as e:
             logger.warning(f"{self.session_name} | Unknown error while trying to add new wallet : {e}", exc_info=True)
         return False
+    
+    async def process_wallet_task(
+        self, 
+        http_client: CloudflareScraper,
+        init_data: str
+    ) -> None:
+        try:
+            isWallet = await self.wallet_task(http_client=http_client)
+            if isWallet:
+                if isWallet.get("walletAddress") == "":
+                    logger.info(f"{self.session_name} | <y>Wallet address not found.</y>")
+                    if settings.AUTO_ADD_WALLET:
+                        tg_id = str(self.tg_account_info.id)
+                        tg_username = str(self.tg_account_info.username) if self.tg_account_info.username else None
+                        wallet_address = await configure_wallet(tg_id=tg_id, tg_username=tg_username, session_name=self.session_name)
+                        if isinstance(wallet_address, str):
+                            submit_wallet = await self.add_wallet(http_client=http_client, wallet_address=wallet_address)
+                            if submit_wallet:
+                                logger.info(f"{self.session_name} | 💳 New wallet address <g>{wallet_address}</g> added successfully.")
+                else:
+                    logger.info(f"{self.session_name} | 💳 Wallet address : <g>{isWallet.get('walletAddress','Not found')}</g>")
+        except Exception as e:
+            logger.warning(f"{self.session_name} | Unknown error while processing airdrop : {e}", exc_info=True)
     
     async def get_balance(
         self, 
@@ -2115,7 +2130,7 @@ class Tapper:
                             play_pass = get_balance.get("play_passes", None)
                             logger.info(f"{self.session_name} | Balance: <g>{balance}</g> - Play pass: <g>{play_pass}</g>")
 
-                        await self.wallet_task(http_client=http_client)
+                        await self.process_wallet_task(http_client=http_client, init_data=tg_web_data)
                         if settings.AUTO_FARMING:
                             farm_info = await self.farm_info(http_client=http_client)
 
