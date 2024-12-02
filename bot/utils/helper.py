@@ -8,6 +8,7 @@ import brotli
 import aiohttp
 import base64
 import functools
+from pytz import UTC
 from typing import Callable
 from bot.utils import logger
 from datetime import datetime
@@ -95,7 +96,7 @@ async def configure_wallet(
         if tg_id in list(wallets_json_file.keys()):
             wallet_address = wallets_json_file[tg_id]['wallet'].get('wallet_address')
         else:
-            status, wallet_data = await generate_ton_wallet()
+            status, wallet_data = await generate_ton_wallet(session_name)
             if status and wallet_data != {}:
                 wallets_json_file[tg_id]={
                     "wallet": wallet_data,
@@ -131,7 +132,13 @@ async def is_expired(token: str) -> bool:
         return True
 
 def convert_utc_to_local(iso_time):
-    dt = datetime.fromisoformat(iso_time.replace('Z', '+00:00'))
-    local_dt = dt.astimezone(get_localzone())
-    unix_time = int(local_dt.timestamp())
-    return unix_time
+    try:
+        dt = datetime.strptime(iso_time, "%Y-%m-%d %H:%M:%S")
+        dt = dt.replace(tzinfo=UTC)
+        local_timezone = get_localzone()
+        local_dt = dt.astimezone(local_timezone)
+        unix_time = int(local_dt.timestamp())
+        return unix_time
+    except Exception as e:
+        logger.error(f"Error converting time: {e}, iso_time: {iso_time}")
+        return None
