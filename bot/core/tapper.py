@@ -18,7 +18,7 @@ from aiohttp import ClientSession, ClientTimeout, ClientConnectorError
 from aiocfscrape import CloudflareScraper
 import asyncio
 from better_proxy import Proxy
-from aiohttp_socks import ProxyConnector
+from aiohttp_proxy import ProxyConnector
 from html import escape
 
 from pyrogram import Client
@@ -176,13 +176,13 @@ class Tapper:
 
         if proxy:
             parsed = Proxy.from_str(proxy)
-            return {
-                'scheme': parsed.protocol,
-                'hostname': parsed.host,
-                'port': int(parsed.port),
-                'username': parsed.login,
-                'password': parsed.password
-            }
+            return dict(
+                scheme=proxy.protocol,
+                hostname=proxy.host,
+                port=proxy.port,
+                username=proxy.login,
+                password=proxy.password
+            )
         return None
 
     async def resolve_peer_with_retry(
