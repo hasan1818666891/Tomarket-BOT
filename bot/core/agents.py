@@ -10,11 +10,7 @@ ANDROID_SDK_MAPPING = {
     "11": 30,
     "10": 29,
     "9": 28,
-    "8": 26,
-    "7": 24,
-    "6": 23,
-    "5": 21,
-    "4": 19,
+    "8": 26
 }
 
 # Default values in case extraction fails
@@ -64,7 +60,7 @@ def generate_app_user_agent(normal_user_agent, app_version=DEFAULT_APP_VERSION, 
 
         # Build the app user agent
         app_user_agent = (
-            f"Mozilla/5.0 (Linux; Android {android_version}; {device_model}) AppleWebKit/537.36 (KHTML, like Gecko) "
+            f"Mozilla/5.0 (Linux; Android {android_version}; K) AppleWebKit/537.36 (KHTML, like Gecko) "
             f"Chrome/{chrome_version} Mobile Safari/537.36 {app_name}/{app_version} "
             f"({device_model}; Android {android_version}; SDK {sdk_version}; AVERAGE)"
         )
