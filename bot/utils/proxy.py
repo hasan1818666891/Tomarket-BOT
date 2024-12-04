@@ -1,7 +1,8 @@
 from better_proxy import Proxy
 from bot.config import settings
+from typing import Optional
 
-def get_proxy(raw_proxy: str) -> str:
+def get_proxy(raw_proxy: Optional[str]) -> Optional[str]:
     
     return Proxy.from_str(proxy=raw_proxy).as_url if raw_proxy else None
     
