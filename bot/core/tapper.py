@@ -177,11 +177,11 @@ class Tapper:
         if proxy:
             parsed = Proxy.from_str(proxy)
             return dict(
-                scheme=proxy.protocol,
-                hostname=proxy.host,
-                port=proxy.port,
-                username=proxy.login,
-                password=proxy.password
+                scheme=parsed.protocol,
+                hostname=parsed.host,
+                port=parsed.port,
+                username=parsed.login,
+                password=parsed.password
             )
         return None
 
