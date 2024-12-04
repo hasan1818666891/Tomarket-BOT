@@ -18,8 +18,7 @@ from aiohttp import ClientSession, ClientTimeout, ClientConnectorError
 from aiocfscrape import CloudflareScraper
 import asyncio
 from better_proxy import Proxy
-from aiohttp_proxy import ProxyConnector
-from html import escape
+from aiohttp_socks import ProxyConnector
 
 from pyrogram import Client
 from pyrogram.raw.functions import account
@@ -35,7 +34,7 @@ from bot.exceptions import InvalidSession
 from bot.core.agents import extract_chrome_version
 from bot.core.registrator import get_tg_client
 from bot.utils.safe_guard import check_base_url
-from bot.utils.helper import get_combo, extract_json_from_response, get_param, is_expired, configure_wallet, convert_utc_to_local
+from bot.utils.helper import get_combo, extract_json_from_response, get_param, is_expired, configure_wallet, convert_utc_to_local, time_until
 
 BASE_API = "https://api-web.tomarket.ai/tomarket-game/v1"
 
@@ -69,7 +68,6 @@ rank_upgrade_api = f"{BASE_API}/rank/upgrade"
 rank_share_api = f"{BASE_API}/rank/sharetg"
 check_token_api = f"{BASE_API}/token/check"
 claim_token_api = f"{BASE_API}/token/claim"
-airdop_task_api = f"{BASE_API}/token/airdropTasks"
 token_balance_api = f"{BASE_API}/token/balance"
 airdrop_task_list_api = f"{BASE_API}/token/airdropTasks"
 airdrop_task_start_api = f"{BASE_API}/token/startTask"
@@ -81,6 +79,12 @@ treasure_balance_api = f"{BASE_API}/invite/queryTreasureBoxBalance"
 season_token_api = f"{BASE_API}/token/season"
 tomatoes_api = f"{BASE_API}/token/tomatoes"
 swap_tomato_api = f"{BASE_API}/token/tomatoToStar"
+
+GAME_ID = {
+    "daily": "fa873d13-d831-4d6f-8aee-9cff7a1d0db1",
+    "drop": "59bcd12e-04e2-404c-a172-311a0084587d",
+    "farm": "53b22103-c7ff-413d-bc63-20f6fb806a07"
+}
 
 class Tapper:
     def __init__(
@@ -160,7 +164,7 @@ class Tapper:
         proxy: Proxy
     ) -> None:
         try:
-            response = await http_client.get(url='https://ipinfo.io/json', timeout=ClientTimeout(20))
+            response = await http_client.get(url='https://ipinfo.io/json', timeout=ClientTimeout(20), ssl=settings.ENABLE_SSL)
             response.raise_for_status()
             response_json = await extract_json_from_response(response=response)
             ip = response_json.get('ip', 'NO')
@@ -341,8 +345,8 @@ class Tapper:
         try:
             while retries < max_retries:
                 async with self.lock:
-                    await http_client.options(login_api, headers=options_headers(method="POST", kwarg=http_client.headers))
-                    response = await http_client.post(login_api, json=payload, timeout=ClientTimeout(20))
+                    await http_client.options(login_api, headers=options_headers(method="POST", kwarg=http_client.headers), ssl=settings.ENABLE_SSL)
+                    response = await http_client.post(login_api, json=payload, timeout=ClientTimeout(20), ssl=settings.ENABLE_SSL)
                     await asyncio.sleep(delay=3)
                     if response.status == 200:
                         response_json = await extract_json_from_response(response=response)
@@ -368,12 +372,14 @@ class Tapper:
         delay: int = 10
     ) -> None:
         retries = 0
-        payload = {"game_id":"fa873d13-d831-4d6f-8aee-9cff7a1d0db1"}
+        payload = {
+            "game_id": GAME_ID["daily"]
+        }
         try:
             while retries < max_retries:
                 async with self.lock:
-                    await http_client.options(daily_claim_api, headers=options_headers(method="POST", kwarg=http_client.headers))
-                    response = await http_client.post(daily_claim_api, json=payload, timeout=ClientTimeout(20))
+                    await http_client.options(daily_claim_api, headers=options_headers(method="POST", kwarg=http_client.headers), ssl=settings.ENABLE_SSL)
+                    response = await http_client.post(daily_claim_api, json=payload, timeout=ClientTimeout(20), ssl=settings.ENABLE_SSL)
                     await asyncio.sleep(delay=3)
                     if response.status == 200:
                         response_json = await extract_json_from_response(response=response)
@@ -412,8 +418,8 @@ class Tapper:
         try:
             while retries < max_retries:
                 async with self.lock:
-                    await http_client.options(wallet_task_api, headers=options_headers(method="POST", kwarg=http_client.headers))
-                    response = await http_client.post(wallet_task_api, timeout=ClientTimeout(20))
+                    await http_client.options(wallet_task_api, headers=options_headers(method="POST", kwarg=http_client.headers), ssl=settings.ENABLE_SSL)
+                    response = await http_client.post(wallet_task_api, timeout=ClientTimeout(20), ssl=settings.ENABLE_SSL)
                     await asyncio.sleep(delay=3)
                     if response.status == 200:
                         response_json = await extract_json_from_response(response=response)
@@ -442,8 +448,8 @@ class Tapper:
         try:
             while retries < max_retries:
                 async with self.lock:
-                    await http_client.options(add_wallet_api, headers=options_headers(method="POST", kwarg=http_client.headers))
-                    response = await http_client.post(add_wallet_api, json=payload, timeout=ClientTimeout(20))
+                    await http_client.options(add_wallet_api, headers=options_headers(method="POST", kwarg=http_client.headers), ssl=settings.ENABLE_SSL)
+                    response = await http_client.post(add_wallet_api, json=payload, timeout=ClientTimeout(20), ssl=settings.ENABLE_SSL)
                     await asyncio.sleep(3)
                     if response.status == 200:
                         response_json = await response.json()
@@ -496,8 +502,8 @@ class Tapper:
         try:
             while retries < max_retries:
                 async with self.lock:
-                    await http_client.options(balance_api, headers=options_headers(method="POST", kwarg=http_client.headers))
-                    response = await http_client.post(balance_api, timeout=ClientTimeout(20))
+                    await http_client.options(balance_api, headers=options_headers(method="POST", kwarg=http_client.headers), ssl=settings.ENABLE_SSL)
+                    response = await http_client.post(balance_api, timeout=ClientTimeout(20), ssl=settings.ENABLE_SSL)
                     await asyncio.sleep(delay=3)
                     if response.status == 200:
                         response_json = await extract_json_from_response(response=response)
@@ -520,13 +526,13 @@ class Tapper:
     ) -> Optional[dict]:
         retries = 0
         payload = {
-            "game_id": "53b22103-c7ff-413d-bc63-20f6fb806a07"
+            "game_id": GAME_ID["farm"]
         }
         try:
             while retries < max_retries:
                 async with self.lock:
-                    await http_client.options(farm_info_api, headers=options_headers(method="POST", kwarg=http_client.headers))
-                    response = await http_client.post(farm_info_api, json=payload, timeout=ClientTimeout(20))
+                    await http_client.options(farm_info_api, headers=options_headers(method="POST", kwarg=http_client.headers), ssl=settings.ENABLE_SSL)
+                    response = await http_client.post(farm_info_api, json=payload, timeout=ClientTimeout(20), ssl=settings.ENABLE_SSL)
                     await asyncio.sleep(delay=3)
                     if response.status == 200:
                         response_json = await extract_json_from_response(response=response)
@@ -549,13 +555,13 @@ class Tapper:
     ) -> Optional[dict]:
         retries = 0
         payload = {
-            "game_id": "53b22103-c7ff-413d-bc63-20f6fb806a07"
+            "game_id": GAME_ID["farm"]
         }
         try:
             while retries < max_retries:
                 async with self.lock:
-                    await http_client.options(claim_farm_api, headers=options_headers(method="POST", kwarg=http_client.headers))
-                    response = await http_client.post(claim_farm_api, json=payload, timeout=ClientTimeout(20))
+                    await http_client.options(claim_farm_api, headers=options_headers(method="POST", kwarg=http_client.headers), ssl=settings.ENABLE_SSL)
+                    response = await http_client.post(claim_farm_api, json=payload, timeout=ClientTimeout(20), ssl=settings.ENABLE_SSL)
                     await asyncio.sleep(delay=3)
                     if response.status == 200:
                         response_json = await extract_json_from_response(response=response)
@@ -584,13 +590,13 @@ class Tapper:
     ) -> Optional[dict]:
         retries = 0
         payload = {
-            "game_id": "53b22103-c7ff-413d-bc63-20f6fb806a07"
+            "game_id": GAME_ID["farm"]
         }
         try:
             while retries < max_retries:
                 async with self.lock:
-                    await http_client.options(start_farm_api, headers=options_headers(method="POST", kwarg=http_client.headers))
-                    response = await http_client.post(start_farm_api, json=payload, timeout=ClientTimeout(20))
+                    await http_client.options(start_farm_api, headers=options_headers(method="POST", kwarg=http_client.headers), ssl=settings.ENABLE_SSL)
+                    response = await http_client.post(start_farm_api, json=payload, timeout=ClientTimeout(20), ssl=settings.ENABLE_SSL)
                     await asyncio.sleep(delay=3)
                     if response.status == 200:
                         response_json = await extract_json_from_response(response=response)
@@ -623,8 +629,8 @@ class Tapper:
         try:
             while retries < max_retries:
                 async with self.lock:
-                    await http_client.options(task_list_api, headers=options_headers(method="POST", kwarg=http_client.headers))
-                    response = await http_client.post(task_list_api, json=payload, timeout=ClientTimeout(20))
+                    await http_client.options(task_list_api, headers=options_headers(method="POST", kwarg=http_client.headers), ssl=settings.ENABLE_SSL)
+                    response = await http_client.post(task_list_api, json=payload, timeout=ClientTimeout(20), ssl=settings.ENABLE_SSL)
                     await asyncio.sleep(delay=3)
                     if response.status == 200:
                         response_json = await extract_json_from_response(response=response)
@@ -655,8 +661,8 @@ class Tapper:
         try:
             while retries < max_retries:
                 async with self.lock:
-                    await http_client.options(task_start_api, headers=options_headers(method="POST", kwarg=http_client.headers))
-                    response = await http_client.post(task_start_api, json=payload, timeout=ClientTimeout(20))
+                    await http_client.options(task_start_api, headers=options_headers(method="POST", kwarg=http_client.headers), ssl=settings.ENABLE_SSL)
+                    response = await http_client.post(task_start_api, json=payload, timeout=ClientTimeout(20), ssl=settings.ENABLE_SSL)
                     await asyncio.sleep(delay=3)
                     if response.status == 200:
                         response_json = await extract_json_from_response(response=response)
@@ -688,8 +694,8 @@ class Tapper:
         try:
             while retries < max_retries:
                 async with self.lock:
-                    await http_client.options(task_check_api, headers=options_headers(method="POST", kwarg=http_client.headers))
-                    response = await http_client.post(task_check_api, json=payload, timeout=ClientTimeout(20))
+                    await http_client.options(task_check_api, headers=options_headers(method="POST", kwarg=http_client.headers), ssl=settings.ENABLE_SSL)
+                    response = await http_client.post(task_check_api, json=payload, timeout=ClientTimeout(20), ssl=settings.ENABLE_SSL)
                     await asyncio.sleep(delay=5)
                     if response.status == 200:
                         response_json = await extract_json_from_response(response=response)
@@ -723,8 +729,8 @@ class Tapper:
         try:
             while retries < max_retries:
                 async with self.lock:
-                    await http_client.options(task_claim_api, headers=options_headers(method="POST", kwarg=http_client.headers))
-                    response = await http_client.post(task_claim_api, json=payload, timeout=ClientTimeout(20))
+                    await http_client.options(task_claim_api, headers=options_headers(method="POST", kwarg=http_client.headers), ssl=settings.ENABLE_SSL)
+                    response = await http_client.post(task_claim_api, json=payload, timeout=ClientTimeout(20), ssl=settings.ENABLE_SSL)
                     await asyncio.sleep(delay=3)
                     if response.status == 200:
                         response_json = await extract_json_from_response(response=response)  
@@ -830,8 +836,8 @@ class Tapper:
         try:
             while retries < max_retries:
                 async with self.lock:
-                    await http_client.options(puzzle_task_api, headers=options_headers(method="POST", kwarg=http_client.headers))
-                    response = await http_client.post(puzzle_task_api, json=payload, timeout=ClientTimeout(20))
+                    await http_client.options(puzzle_task_api, headers=options_headers(method="POST", kwarg=http_client.headers), ssl=settings.ENABLE_SSL)
+                    response = await http_client.post(puzzle_task_api, json=payload, timeout=ClientTimeout(20), ssl=settings.ENABLE_SSL)
                     await asyncio.sleep(delay=3)
                     if response.status == 200:
                         response_json = await extract_json_from_response(response=response)
@@ -861,8 +867,8 @@ class Tapper:
         try:
             while retries < max_retries:
                 async with self.lock:
-                    await http_client.options(claim_puzzle_api, headers=options_headers(method="POST", kwarg=http_client.headers))
-                    response = await http_client.post(claim_puzzle_api, json=payload, timeout=ClientTimeout(20))
+                    await http_client.options(claim_puzzle_api, headers=options_headers(method="POST", kwarg=http_client.headers), ssl=settings.ENABLE_SSL)
+                    response = await http_client.post(claim_puzzle_api, json=payload, timeout=ClientTimeout(20), ssl=settings.ENABLE_SSL)
                     await asyncio.sleep(delay=3)
                     if response.status == 200:
                         response_json = await extract_json_from_response(response=response)
@@ -871,7 +877,6 @@ class Tapper:
                     else:
                         retries += 1
                         logger.warning(f"{self.session_name} | Claiming puzzle task failed: <r>{response.status}</r>, retying... (<g>{retries}</g>/<r>{max_retries}</r>)")
-                        # logger.debug(f"{self.session_name} | {escape(await response.text())}")
                         await asyncio.sleep(delay)
                         delay *= 2
         except Exception as e:
@@ -939,13 +944,13 @@ class Tapper:
     ) -> Optional[dict]:
         retries = 0
         payload = {
-            "game_id": "59bcd12e-04e2-404c-a172-311a0084587d"
+            "game_id": GAME_ID["drop"]
         }
         try:
             while retries < max_retries:
                 async with self.lock:
-                    await http_client.options(play_game_api, headers=options_headers(method="POST", kwarg=http_client.headers))
-                    response = await http_client.post(play_game_api, json=payload, timeout=ClientTimeout(20))
+                    await http_client.options(play_game_api, headers=options_headers(method="POST", kwarg=http_client.headers), ssl=settings.ENABLE_SSL)
+                    response = await http_client.post(play_game_api, json=payload, timeout=ClientTimeout(20), ssl=settings.ENABLE_SSL)
                     await asyncio.sleep(delay=3)
                     if response.status == 200:
                         response_json = await extract_json_from_response(response=response)
@@ -954,7 +959,6 @@ class Tapper:
                     else:
                         retries += 1
                         logger.warning(f"{self.session_name} | starting game failed: <r>{response.status}</r>, retying... (<g>{retries}</g>/<r>{max_retries}</r>)")
-                        # logger.debug(f"{self.session_name} | {escape(await response.text())}")
                         await asyncio.sleep(delay)
                         delay *= 2
         except Exception as e:
@@ -971,15 +975,15 @@ class Tapper:
     ) -> Optional[dict]:
         retries = 0
         payload = {
-            "game_id": "59bcd12e-04e2-404c-a172-311a0084587d",
+            "game_id": GAME_ID["drop"],
             "points": points,
             "stars": stars
         }
         try:
             while retries < max_retries:
                 async with self.lock:
-                    await http_client.options(claim_game_api, headers=options_headers(method="POST", kwarg=http_client.headers))
-                    response = await http_client.post(claim_game_api, json=payload, timeout=ClientTimeout(20))
+                    await http_client.options(claim_game_api, headers=options_headers(method="POST", kwarg=http_client.headers), ssl=settings.ENABLE_SSL)
+                    response = await http_client.post(claim_game_api, json=payload, timeout=ClientTimeout(20), ssl=settings.ENABLE_SSL)
                     await asyncio.sleep(3)  # Optional delay before checking the response
                     if response.status == 200:
                         response_json = await extract_json_from_response(response=response)
@@ -1002,13 +1006,13 @@ class Tapper:
     ) -> None:
         retries = 0
         payload = {
-            "game_id": "59bcd12e-04e2-404c-a172-311a0084587d"
+            "game_id": GAME_ID["drop"]
         }
         try:
             while retries < max_retries:
                 async with self.lock:
-                    await http_client.options(share_game_api, headers=options_headers(method="POST", kwarg=http_client.headers))
-                    response = await http_client.post(share_game_api, json=payload, timeout=ClientTimeout(20))
+                    await http_client.options(share_game_api, headers=options_headers(method="POST", kwarg=http_client.headers), ssl=settings.ENABLE_SSL)
+                    response = await http_client.post(share_game_api, json=payload, timeout=ClientTimeout(20), ssl=settings.ENABLE_SSL)
                     await asyncio.sleep(delay=3)
                     if response.status == 200:
                         response_json = await extract_json_from_response(response=response)
@@ -1089,8 +1093,8 @@ class Tapper:
         try:
             while retries < max_retries:
                 async with self.lock:
-                    await http_client.options(rank_data_api, headers=options_headers(method="POST", kwarg=http_client.headers))
-                    response = await http_client.post(rank_data_api, json=payload, timeout=ClientTimeout(20))
+                    await http_client.options(rank_data_api, headers=options_headers(method="POST", kwarg=http_client.headers), ssl=settings.ENABLE_SSL)
+                    response = await http_client.post(rank_data_api, json=payload, timeout=ClientTimeout(20), ssl=settings.ENABLE_SSL)
                     await asyncio.sleep(delay=3)
                     if response.status == 200:
                         response_json = await extract_json_from_response(response=response)
@@ -1115,8 +1119,8 @@ class Tapper:
         try:
             while retries < max_retries:
                 async with self.lock:
-                    await http_client.options(rank_evaluate_api, headers=options_headers(method="POST", kwarg=http_client.headers))
-                    response = await http_client.post(rank_evaluate_api, timeout=ClientTimeout(20))
+                    await http_client.options(rank_evaluate_api, headers=options_headers(method="POST", kwarg=http_client.headers), ssl=settings.ENABLE_SSL)
+                    response = await http_client.post(rank_evaluate_api, timeout=ClientTimeout(20), ssl=settings.ENABLE_SSL)
                     await asyncio.sleep(delay=3)
                     if response.status == 200:
                         response_json = await extract_json_from_response(response=response)
@@ -1142,8 +1146,8 @@ class Tapper:
         try:
             while retries < max_retries:
                 async with self.lock:
-                    await http_client.options(rank_create_api, headers=options_headers(method="POST", kwarg=http_client.headers))
-                    response = await http_client.post(rank_create_api, timeout=ClientTimeout(20))
+                    await http_client.options(rank_create_api, headers=options_headers(method="POST", kwarg=http_client.headers), ssl=settings.ENABLE_SSL)
+                    response = await http_client.post(rank_create_api, timeout=ClientTimeout(20), ssl=settings.ENABLE_SSL)
                     await asyncio.sleep(delay=3)
                     if response.status == 200:
                         response_json = await extract_json_from_response(response=response)
@@ -1192,8 +1196,8 @@ class Tapper:
         try:
             while retries < max_retries:
                 async with self.lock:
-                    await http_client.options(spin_show_api, headers=options_headers(method="POST", kwarg=http_client.headers))
-                    response = await http_client.post(spin_show_api, json=payload, timeout=ClientTimeout(20))
+                    await http_client.options(spin_show_api, headers=options_headers(method="POST", kwarg=http_client.headers), ssl=settings.ENABLE_SSL)
+                    response = await http_client.post(spin_show_api, json=payload, timeout=ClientTimeout(20), ssl=settings.ENABLE_SSL)
                     await asyncio.sleep(delay=3)
                     if response.status == 200:
                         response_json = await extract_json_from_response(response=response)
@@ -1224,8 +1228,8 @@ class Tapper:
         try:
             while retries < max_retries:
                 async with self.lock:
-                    await http_client.options(spin_free_api, headers=options_headers(method="POST", kwarg=http_client.headers))
-                    response = await http_client.post(spin_free_api, json=payload, timeout=ClientTimeout(20))
+                    await http_client.options(spin_free_api, headers=options_headers(method="POST", kwarg=http_client.headers), ssl=settings.ENABLE_SSL)
+                    response = await http_client.post(spin_free_api, json=payload, timeout=ClientTimeout(20), ssl=settings.ENABLE_SSL)
                     await asyncio.sleep(delay=3)
                     if response.status == 200:
                         response_json = await extract_json_from_response(response=response)
@@ -1251,8 +1255,8 @@ class Tapper:
         try:
             while retries < max_retries:
                 async with self.lock:
-                    await http_client.options(spin_once_api, headers=options_headers(method="POST", kwarg=http_client.headers))
-                    response = await http_client.post(spin_once_api, timeout=ClientTimeout(20))
+                    await http_client.options(spin_once_api, headers=options_headers(method="POST", kwarg=http_client.headers), ssl=settings.ENABLE_SSL)
+                    response = await http_client.post(spin_once_api, timeout=ClientTimeout(20), ssl=settings.ENABLE_SSL)
                     await asyncio.sleep(delay=3)
                     retries += 1
                     if response.status == 200:
@@ -1284,8 +1288,8 @@ class Tapper:
         try:
             while retries < max_retries:
                 async with self.lock:
-                    await http_client.options(user_tickets_api, headers=options_headers(method="POST", kwarg=http_client.headers))
-                    response = await http_client.post(user_tickets_api, json=payload, timeout=ClientTimeout(20))
+                    await http_client.options(user_tickets_api, headers=options_headers(method="POST", kwarg=http_client.headers), ssl=settings.ENABLE_SSL)
+                    response = await http_client.post(user_tickets_api, json=payload, timeout=ClientTimeout(20), ssl=settings.ENABLE_SSL)
                     await asyncio.sleep(delay=3)
                     if response.status == 200:
                         response_json = await extract_json_from_response(response=response)
@@ -1314,8 +1318,8 @@ class Tapper:
         try:
             while retries < max_retries:
                 async with self.lock:
-                    await http_client.options(spin_raffle_api, headers=options_headers(method="POST", kwarg=http_client.headers))
-                    response = await http_client.post(spin_raffle_api, json=payload, timeout=ClientTimeout(20))
+                    await http_client.options(spin_raffle_api, headers=options_headers(method="POST", kwarg=http_client.headers), ssl=settings.ENABLE_SSL)
+                    response = await http_client.post(spin_raffle_api, json=payload, timeout=ClientTimeout(20), ssl=settings.ENABLE_SSL)
                     await asyncio.sleep(delay=3)
                     if response.status == 200:
                         response_json = await extract_json_from_response(response=response)
@@ -1346,8 +1350,8 @@ class Tapper:
         try:
             while retries < max_retries:
                 async with self.lock:
-                    await http_client.options(spin_assets_api, headers=options_headers(method="POST", kwarg=http_client.headers))
-                    response = await http_client.post(spin_assets_api, json=payload, timeout=ClientTimeout(20))
+                    await http_client.options(spin_assets_api, headers=options_headers(method="POST", kwarg=http_client.headers), ssl=settings.ENABLE_SSL)
+                    response = await http_client.post(spin_assets_api, json=payload, timeout=ClientTimeout(20), ssl=settings.ENABLE_SSL)
                     await asyncio.sleep(delay=3)
                     retries += 1
                     if response.status == 200:
@@ -1429,8 +1433,8 @@ class Tapper:
         try:
             while retries < max_retries:
                 async with self.lock:
-                    await http_client.options(rank_upgrade_api, headers=options_headers(method="POST", kwarg=http_client.headers))
-                    response = await http_client.post(rank_upgrade_api, json=payload, timeout=ClientTimeout(20))
+                    await http_client.options(rank_upgrade_api, headers=options_headers(method="POST", kwarg=http_client.headers), ssl=settings.ENABLE_SSL)
+                    response = await http_client.post(rank_upgrade_api, json=payload, timeout=ClientTimeout(20), ssl=settings.ENABLE_SSL)
                     await asyncio.sleep(delay=3)
                     if response.status == 200:
                         response_json = await extract_json_from_response(response=response)
@@ -1455,8 +1459,8 @@ class Tapper:
         try:
             while retries < max_retries:
                 async with self.lock:
-                    await http_client.options(rank_share_api, headers=options_headers(method="POST", kwarg=http_client.headers))
-                    response = await http_client.post(rank_share_api, timeout=ClientTimeout(20))
+                    await http_client.options(rank_share_api, headers=options_headers(method="POST", kwarg=http_client.headers), ssl=settings.ENABLE_SSL)
+                    response = await http_client.post(rank_share_api, timeout=ClientTimeout(20), ssl=settings.ENABLE_SSL)
                     await asyncio.sleep(delay=3)
                     if response.status == 200:
                         response_json = await extract_json_from_response(response=response)
@@ -1529,8 +1533,8 @@ class Tapper:
         try:
             while retries < max_retries:
                 async with self.lock:
-                    await http_client.options(check_token_api, headers=options_headers(method="POST", kwarg=http_client.headers))
-                    response = await http_client.post(check_token_api, json=payload, timeout=ClientTimeout(20))
+                    await http_client.options(check_token_api, headers=options_headers(method="POST", kwarg=http_client.headers), ssl=settings.ENABLE_SSL)
+                    response = await http_client.post(check_token_api, json=payload, timeout=ClientTimeout(20), ssl=settings.ENABLE_SSL)
                     await asyncio.sleep(delay=3)
                     if response.status == 200:
                         response_json = await extract_json_from_response(response=response)
@@ -1560,8 +1564,8 @@ class Tapper:
         try:
             while retries < max_retries:
                 async with self.lock:
-                    await http_client.options(token_balance_api, headers=options_headers(method="POST", kwarg=http_client.headers))
-                    response = await http_client.post(token_balance_api, json=payload, timeout=ClientTimeout(20))
+                    await http_client.options(token_balance_api, headers=options_headers(method="POST", kwarg=http_client.headers), ssl=settings.ENABLE_SSL)
+                    response = await http_client.post(token_balance_api, json=payload, timeout=ClientTimeout(20), ssl=settings.ENABLE_SSL)
                     await asyncio.sleep(delay=3)
                     if response.status == 200:
                         response_json = await extract_json_from_response(response=response)
@@ -1589,8 +1593,8 @@ class Tapper:
         try:
             while retries < max_retries:
                 async with self.lock:
-                    await http_client.options(claim_token_api, headers=options_headers(method="POST", kwarg=http_client.headers))
-                    response = await http_client.post(claim_token_api, json=payload, timeout=ClientTimeout(20))
+                    await http_client.options(claim_token_api, headers=options_headers(method="POST", kwarg=http_client.headers), ssl=settings.ENABLE_SSL)
+                    response = await http_client.post(claim_token_api, json=payload, timeout=ClientTimeout(20), ssl=settings.ENABLE_SSL)
                     await asyncio.sleep(delay=3)
                 
                     if response.status == 200:
@@ -1651,8 +1655,8 @@ class Tapper:
         try:
             while retries < max_retries:
                 async with self.lock:
-                    await http_client.options(airdrop_task_list_api, headers=options_headers(method="POST", kwarg=http_client.headers))
-                    response = await http_client.post(airdrop_task_list_api, json=payload, timeout=ClientTimeout(20))
+                    await http_client.options(airdrop_task_list_api, headers=options_headers(method="POST", kwarg=http_client.headers), ssl=settings.ENABLE_SSL)
+                    response = await http_client.post(airdrop_task_list_api, json=payload, timeout=ClientTimeout(20), ssl=settings.ENABLE_SSL)
                     await asyncio.sleep(delay=3)
                     if response.status == 200:
                         response_json = await extract_json_from_response(response=response)
@@ -1683,8 +1687,8 @@ class Tapper:
         try:
             while retries < max_retries:
                 async with self.lock:
-                    await http_client.options(airdrop_task_start_api, headers=options_headers(method="POST", kwarg=http_client.headers))
-                    response = await http_client.post(airdrop_task_start_api, json=payload, timeout=ClientTimeout(20))
+                    await http_client.options(airdrop_task_start_api, headers=options_headers(method="POST", kwarg=http_client.headers), ssl=settings.ENABLE_SSL)
+                    response = await http_client.post(airdrop_task_start_api, json=payload, timeout=ClientTimeout(20), ssl=settings.ENABLE_SSL)
                     await asyncio.sleep(delay=3)
                     if response.status == 200:
                         response_json = await extract_json_from_response(response=response)
@@ -1716,8 +1720,8 @@ class Tapper:
         try:
             while retries < max_retries:
                 async with self.lock:
-                    await http_client.options(airdrop_task_check_api, headers=options_headers(method="POST", kwarg=http_client.headers))
-                    response = await http_client.post(airdrop_task_check_api, json=payload, timeout=ClientTimeout(20))
+                    await http_client.options(airdrop_task_check_api, headers=options_headers(method="POST", kwarg=http_client.headers), ssl=settings.ENABLE_SSL)
+                    response = await http_client.post(airdrop_task_check_api, json=payload, timeout=ClientTimeout(20), ssl=settings.ENABLE_SSL)
                     await asyncio.sleep(delay=4)
                     
                     if response.status == 200:
@@ -1753,8 +1757,8 @@ class Tapper:
         try:
             while retries < max_retries:
                 async with self.lock:
-                    await http_client.options(airdrop_task_claim_api, headers=options_headers(method="POST", kwarg=http_client.headers))
-                    response = await http_client.post(airdrop_task_claim_api, json=payload, timeout=ClientTimeout(20))
+                    await http_client.options(airdrop_task_claim_api, headers=options_headers(method="POST", kwarg=http_client.headers), ssl=settings.ENABLE_SSL)
+                    response = await http_client.post(airdrop_task_claim_api, json=payload, timeout=ClientTimeout(20), ssl=settings.ENABLE_SSL)
                     await asyncio.sleep(delay=3)
                     if response.status == 200:
                         response_json = await extract_json_from_response(response=response)  
@@ -1860,8 +1864,8 @@ class Tapper:
         try:
             while retries < max_retries:
                 async with self.lock:
-                    await http_client.options(treasure_status_api, headers=options_headers(method="POST", kwarg=http_client.headers))
-                    response = await http_client.post(treasure_status_api, json=payload, timeout=ClientTimeout(20))
+                    await http_client.options(treasure_status_api, headers=options_headers(method="POST", kwarg=http_client.headers), ssl=settings.ENABLE_SSL)
+                    response = await http_client.post(treasure_status_api, json=payload, timeout=ClientTimeout(20), ssl=settings.ENABLE_SSL)
                     await asyncio.sleep(delay=3)
                     if response.status == 200:
                         response_json = await extract_json_from_response(response=response)  
@@ -1885,8 +1889,8 @@ class Tapper:
         try:
             while retries < max_retries:
                 async with self.lock:
-                    await http_client.options(treasure_open_api, headers=options_headers(method="POST", kwarg=http_client.headers))
-                    response = await http_client.post(treasure_open_api, timeout=ClientTimeout(20))
+                    await http_client.options(treasure_open_api, headers=options_headers(method="POST", kwarg=http_client.headers), ssl=settings.ENABLE_SSL)
+                    response = await http_client.post(treasure_open_api, timeout=ClientTimeout(20), ssl=settings.ENABLE_SSL)
                     await asyncio.sleep(delay=3)
                     if response.status == 200:
                         response_json = await extract_json_from_response(response=response)  
@@ -1915,8 +1919,8 @@ class Tapper:
         try:
             while retries < max_retries:
                 async with self.lock:
-                    await http_client.options(treasure_balance_api, headers=options_headers(method="POST", kwarg=http_client.headers))
-                    response = await http_client.post(treasure_balance_api, json=payload, timeout=ClientTimeout(20))
+                    await http_client.options(treasure_balance_api, headers=options_headers(method="POST", kwarg=http_client.headers), ssl=settings.ENABLE_SSL)
+                    response = await http_client.post(treasure_balance_api, json=payload, timeout=ClientTimeout(20), ssl=settings.ENABLE_SSL)
                     await asyncio.sleep(delay=3)
                     if response.status == 200:
                         response_json = await extract_json_from_response(response=response)  
@@ -1962,8 +1966,8 @@ class Tapper:
         try:
             while retries < max_retries:
                 async with self.lock:
-                    await http_client.options(season_token_api, headers=options_headers(method="POST", kwarg=http_client.headers))
-                    response = await http_client.post(season_token_api, json=payload, timeout=ClientTimeout(20))
+                    await http_client.options(season_token_api, headers=options_headers(method="POST", kwarg=http_client.headers), ssl=settings.ENABLE_SSL)
+                    response = await http_client.post(season_token_api, json=payload, timeout=ClientTimeout(20), ssl=settings.ENABLE_SSL)
                     await asyncio.sleep(delay=3)
                     if response.status == 200:
                         response_json = await extract_json_from_response(response=response)  
@@ -1999,7 +2003,10 @@ class Tapper:
                 else:
                     toma = round(season_token.get('toma', 0), 2)
                     stars = season_token.get('stars', None)
-                    logger.info(f"{self.session_name} | Round: <g>{round_}</g> | Claimable: <g>{toma}</g> $TOMA - <g>{stars}</g> Stars | End at: <g>{end_time}</g>")
+                    timestamp_end = convert_utc_to_local(end_time)
+                    target_time = datetime.fromtimestamp(timestamp_end)
+                    days, hours, minutes, seconds = time_until(target_time)
+                    logger.info(f"{self.session_name} | Weekly round: <g>{round_}</g> | Claimable: <g>{toma}</g> $TOMA - <g>{stars}</g> Stars | End in: <g>{days}</g> days, <g>{hours}</g> hours, <g>{minutes}</g> minutes, <g>{seconds}</g> seconds")
         except Exception as e:
             logger.warning(f"{self.session_name} | Unknown error while processing weekly airdrop : {e}", exc_info=True)
     
@@ -2018,8 +2025,8 @@ class Tapper:
         try:
             while retries < max_retries:
                 async with self.lock:
-                    await http_client.options(tomatoes_api, headers=options_headers(method="POST", kwarg=http_client.headers))
-                    response = await http_client.post(tomatoes_api, json=payload, timeout=ClientTimeout(20))
+                    await http_client.options(tomatoes_api, headers=options_headers(method="POST", kwarg=http_client.headers), ssl=settings.ENABLE_SSL)
+                    response = await http_client.post(tomatoes_api, json=payload, timeout=ClientTimeout(20), ssl=settings.ENABLE_SSL)
                     await asyncio.sleep(delay=3)
                     if response.status == 200:
                         response_json = await extract_json_from_response(response=response)  
@@ -2043,8 +2050,8 @@ class Tapper:
         try:
             while retries < max_retries:
                 async with self.lock:
-                    await http_client.options(swap_tomato_api, headers=options_headers(method="POST", kwarg=http_client.headers))
-                    response = await http_client.post(swap_tomato_api, timeout=ClientTimeout(20))
+                    await http_client.options(swap_tomato_api, headers=options_headers(method="POST", kwarg=http_client.headers), ssl=settings.ENABLE_SSL)
+                    response = await http_client.post(swap_tomato_api, timeout=ClientTimeout(20), ssl=settings.ENABLE_SSL)
                     await asyncio.sleep(delay=3)
                     if response.status == 200:
                         response_json = await extract_json_from_response(response=response)  
@@ -2091,6 +2098,7 @@ class Tapper:
         headers['Sec-Ch-Ua'] = f'"Chromium";v="{chrome_ver}", "Android WebView";v="{chrome_ver}", "Not?A_Brand";v="24"'
         tg_web_data = await self.get_tg_web_data(proxy=proxy)
         if tg_web_data is None:
+            logger.warning(f"{self.session_name} | retrieving telegram web data failed")
             return
         timeout = ClientTimeout(total=60)
         async with CloudflareScraper(headers=headers, connector=proxy_conn, trust_env=True, auto_decompress=False, timeout=timeout) as http_client:
