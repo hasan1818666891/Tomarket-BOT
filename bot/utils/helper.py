@@ -131,14 +131,38 @@ async def is_expired(token: str) -> bool:
         # In case of any error (like invalid token format)
         return True
 
+def ensure_timezone(iso_time, tomarket_timezone_offset="+08:00"): # Because Tomarket's timezone offset is GMT+8
+    if any(sign in iso_time[-6:] for sign in ["+", "-"]):
+        return iso_time
+    else:
+        return f"{iso_time}{tomarket_timezone_offset}"
+
 def convert_utc_to_local(iso_time):
     try:
-        dt = datetime.strptime(iso_time, "%Y-%m-%d %H:%M:%S")
-        dt = dt.replace(tzinfo=UTC)
+        iso_time_with_tz = ensure_timezone(iso_time)
+        dt = datetime.fromisoformat(iso_time_with_tz)
         local_timezone = get_localzone()
         local_dt = dt.astimezone(local_timezone)
         unix_time = int(local_dt.timestamp())
         return unix_time
     except Exception as e:
         logger.error(f"Error converting time: {e}, iso_time: {iso_time}")
+        return None
+
+def time_until(target_time):
+    try:
+        if not isinstance(target_time, datetime):
+            target_dt = datetime.strptime(target_time, "%Y-%m-%d %H:%M:%S")
+        else:
+            target_dt = target_time
+        now = datetime.now()
+        difference = target_dt - now
+        days = difference.days
+        seconds = difference.seconds
+        hours = seconds // 3600
+        minutes = (seconds % 3600) // 60
+        seconds = seconds % 60
+        return days, hours, minutes, seconds
+    except Exception as e:
+        print(f"Error calculating time difference: {e}")
         return None
