@@ -38,6 +38,8 @@ class Settings(BaseSettings):
     
     REF_ID: str = '0000A4cW'
     
+    ENABLE_SSL: bool = True
+    
     DISABLED_TASKS: list[str] = [
                         'medal_donate', 
                         'daily_donate', 
