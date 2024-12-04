@@ -29,13 +29,55 @@ session.headers.update({
 #URL's
 BASE_PAGE_URL = "https://mini-app.tomarket.ai/"
 DETECTION_CONFIG_URL = "https://raw.githubusercontent.com/khondokerXhasan/bin/refs/heads/main/detect.json"
-BASE_API = "https://api-web.tomarket.ai/tomarket-game/v1"
+API_ENDPOINTS = [
+    r'online:\s*["\']https://api-web.tomarket.ai/tomarket-game/v1["\']',
+    r'test:\s*["\']https://api-gateway-go-web.bitkeep.zone/tomarket-game/v1["\']',
+    r'beta:\s*["\']https://api-gateway-web.bknode.vip/tomarket-game/v1["\']',
+    r'const\s*RT\s*=\s*["\']online["\']',
+    r'drop:\s*["\']59bcd12e-04e2-404c-a172-311a0084587d["\']',
+    r'daily:\s*["\']fa873d13-d831-4d6f-8aee-9cff7a1d0db1["\']',
+    r'farm:\s*["\']53b22103-c7ff-413d-bc63-20f6fb806a07["\']',
+    r"/user/login",
+    r"/tasks/walletTask",
+    r"/tasks/address",
+    r"/user/balance",
+    r"/daily/claim",
+    r"/tasks/list",
+    r"/tasks/start",
+    r"/tasks/check",
+    r"/tasks/claim",
+    r"/tasks/puzzle",
+    r"/tasks/puzzleClaim",
+    r"/rank/data",
+    r"/rank/create",
+    r"/rank/evaluate",
+    r"/spin/show",
+    r"/spin/free",
+    r"/spin/once",
+    r"/spin/raffle",
+    r"/user/tickets",
+    r"/spin/assets",
+    r"/rank/upgrade",
+    r"/rank/sharetg",
+    r"/token/check",
+    r"/token/claim",
+    r"/token/balance",
+    r"/token/airdropTasks",
+    r"/token/startTask",
+    r"/token/claimTask",
+    r"/token/checkTask",
+    r"/token/tomatoes",
+    r"/token/tomatoToStar",
+    r"/token/season",
+    r"/tasks/classmateTask",
+    r"/tasks/classmateStars"
+]
 
 async def fetch_js_paths(base_url):
     try:
         response = session.get(base_url)
         response.raise_for_status()
-        pattern = r'"(/assets/[^"]+\.js)"'
+        pattern = r'src="(/.*?/index.*?\.js)"'
         matches = re.findall(pattern, response.text)
         return matches
     except Exception as e:
@@ -48,14 +90,14 @@ async def get_base_api(url):
         response = session.get(url)
         response.raise_for_status()
         content = response.text
-        pattern = r'online:"(https?://[^"]+)"'
-        match = re.search(pattern, content)
+        missing_endpoints = [pattern for pattern in API_ENDPOINTS if not re.search(pattern, content)]
 
-        if match:
-            return match.group(1)
+        if not missing_endpoints:
+            return True
         else:
-            logger.warning("Could not find 'BASE_API' in the content.")
-            return None
+            logger.error(f"<y>API and Endpoints Changed:</y> <c>{'<r>,</r> '.join(missing_endpoints)}</c>")
+            return False
+
     except Exception as e:
         logger.error(f"Error fetching the JS file: {e}")
         return None
@@ -72,7 +114,7 @@ async def check_base_url(session_name):
                 logger.info(f"{session_name} | Trying format: <g>{format_}</g>")
                 full_url = f"{BASE_PAGE_URL.rstrip('/')}{format_}"
                 result = await get_base_api(full_url)
-                if str(result) == BASE_API:
+                if result:
                     logger.info(f"{session_name} | No change in api!")
                     return True
             return False
@@ -87,7 +129,7 @@ async def check_base_url(session_name):
                 logger.error(f"Error fetching the base URL for content dump: {e}")
                 return False      
 
-@cached(ttl=2700, cache=Cache.MEMORY) # Cache detect.json file for 45 minutes
+@cached(ttl=1800, cache=Cache.MEMORY) # Cache detect.json file for 30 minutes
 async def load_detection_data(
     config_url: str,
     max_retries: int = 5,
@@ -144,7 +186,8 @@ async def advance_detection(base_url, config_url):
         matching_path = next((path for path in js_paths if file_name in path), None)
         if not matching_path:
             logger.warning(f"Expected file <y>{file_name}</y> not found in JavaScript paths.")
-            logger.info(f"JavaScript file Changed. New files: <e>{js_paths}</e>")
+            filenames = [os.path.basename(path) for path in js_paths]
+            logger.info(f"New files: <e>{'<r>,</r> '.join(filenames)}</e>")
             return False
         
         full_url = f"{base_url.rstrip('/')}{matching_path}"
