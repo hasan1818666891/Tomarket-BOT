@@ -1,24 +1,15 @@
-import io
-import os
-import json
-import gzip
-import functools
+import aiohttp
+import asyncio
 import traceback
 from time import time
-from typing import Any
-from typing import Callable, Optional
-from random import randint, choices, uniform, choices
+from better_proxy import Proxy
 from urllib.parse import unquote, quote
 from datetime import datetime, timedelta
-from tzlocal import get_localzone
-import base64
-import brotli
-import aiohttp
-from aiohttp import ClientSession, ClientTimeout, ClientConnectorError
+from typing import Any, Callable, Optional
 from aiocfscrape import CloudflareScraper
-import asyncio
-from better_proxy import Proxy
-from aiohttp_socks import ProxyConnector
+from aiohttp_proxy import ProxyConnector
+from random import randint, choices, uniform, choices
+from aiohttp import ClientSession, ClientTimeout, ClientConnectorError
 
 from pyrogram import Client
 from pyrogram.raw.functions import account
@@ -79,6 +70,17 @@ treasure_balance_api = f"{BASE_API}/invite/queryTreasureBoxBalance"
 season_token_api = f"{BASE_API}/token/season"
 tomatoes_api = f"{BASE_API}/token/tomatoes"
 swap_tomato_api = f"{BASE_API}/token/tomatoToStar"
+
+get_auto_farms_api = f"{BASE_API}/launchpad/getAutoFarms"
+launchpad_task_status_api = f"{BASE_API}/launchpad/taskStatus"
+launchpad_tasks_api = f"{BASE_API}/launchpad/tasks"
+launchpad_task_claim_api = f"{BASE_API}/launchpad/taskClaim"
+launchpad_detail_api = f"{BASE_API}/launchpad/detail"
+launchpad_toma_balance_api = f"{BASE_API}/launchpad/tomaBalance"
+invest_toma_api = f"{BASE_API}/launchpad/investToma"
+start_auto_farm_api = f"{BASE_API}/launchpad/startAutoFarm"
+claim_auto_farms_api = f"{BASE_API}/launchpad/claimAutoFarm"
+
 
 GAME_ID = {
     "daily": "fa873d13-d831-4d6f-8aee-9cff7a1d0db1",
@@ -785,7 +787,7 @@ class Tapper:
                             logger.info(f"{self.session_name} | 🥳 Task <g>{name}</g> finished successfully")
                             claim_task = await self.claim_task(http_client=http_client, task_id=task_id)
                             if claim_task.get('data', None) == 'ok':
-                                logger.info(f"{self.session_name} | 🎉 Task <g>{name}</g> claimed successfully | rewarded : <g>+{reward}</g>")
+                                logger.info(f"{self.session_name} | 🎉 Task <g>{name}</g> claimed successfully | rewarded : <g>+{reward}</g> tomato")
                             else:
                                 logger.info(f"{self.session_name} | <y>Task {name} not claimed</y>")
                         else:
@@ -793,11 +795,11 @@ class Tapper:
                     elif isinstance(start_task, dict) and start_task.get("status", 0) == 2:
                         claim_task = await self.claim_task(http_client=http_client, task_id=task_id)
                         if claim_task.get('data', None) == 'ok':
-                            logger.info(f"{self.session_name} | 🎉 Task <g>{name}</g> claimed successfully | rewarded : <g>+{reward}</g>")
+                            logger.info(f"{self.session_name} | 🎉 Task <g>{name}</g> claimed successfully | rewarded : <g>+{reward}</g> tomato")
                         else:
                             logger.info(f"{self.session_name} | <y>Task {name} not claimed</y>")
                     elif isinstance(start_task, str) and start_task == "ok":
-                        logger.info(f"{self.session_name} | 🎉 Task <g>{name}</g> claimed successfully | rewarded : <g>+{reward}</g>")
+                        logger.info(f"{self.session_name} | 🎉 Task <g>{name}</g> claimed successfully | rewarded : <g>+{reward}</g> tomato")
                     else:
                         logger.info(f"{self.session_name} | <y>Task {name} not started</y>")
                 elif status == 1:
@@ -806,7 +808,7 @@ class Tapper:
                         logger.info(f"{self.session_name} | 🥳 Task <g>{name}</g> finished successfully")
                         claim_task = await self.claim_task(http_client=http_client, task_id=task_id)
                         if claim_task.get('data', None) == 'ok':
-                            logger.info(f"{self.session_name} | 🎉 Task <g>{name}</g> claimed successfully | rewarded : <g>+{reward}</g>")
+                            logger.info(f"{self.session_name} | 🎉 Task <g>{name}</g> claimed successfully | rewarded : <g>+{reward}</g> tomato")
                         else:
                             logger.info(f"{self.session_name} | <y>Task {name} not claimed</y>")
                     else:
@@ -814,7 +816,7 @@ class Tapper:
                 elif status == 2:
                     claim_task = await self.claim_task(http_client=http_client, task_id=task_id)
                     if claim_task.get('data', None) == 'ok':
-                        logger.info(f"{self.session_name} | 🎉 Task <g>{name}</g> claimed successfully | rewarded : <g>+{reward}</g>")
+                        logger.info(f"{self.session_name} | 🎉 Task <g>{name}</g> claimed successfully | rewarded : <g>+{reward}</g> tomato")
                     else:
                         logger.info(f"{self.session_name} | <y>Task {name} not claimed</y>")
         except Exception as e:
@@ -1822,11 +1824,11 @@ class Tapper:
                            elif isinstance(start_task, dict) and start_task.get("status", 0) == 2:
                                claim_task = await self.claim_airdrop_task(http_client=http_client, task_id=task_id)
                                if claim_task.get('data', None) == 'ok':
-                                   logger.info(f"{self.session_name} | 🎉 Task <g>{name}</g> claimed successfully | rewarded : <g>+{reward}</g>")
+                                   logger.info(f"{self.session_name} | 🎉 Task <g>{name}</g> claimed successfully | rewarded : <g>+{reward} $TOMA</g>")
                                else:
                                    logger.info(f"{self.session_name} | <y>Task {name} not claimed</y>")
                            elif isinstance(start_task, str) and start_task == "ok":
-                               logger.info(f"{self.session_name} | 🎉 Task <g>{name}</g> claimed successfully | rewarded : <g>+{reward}</g>")
+                               logger.info(f"{self.session_name} | 🎉 Task <g>{name}</g> claimed successfully | rewarded : <g>+{reward} $TOMA</g>")
                            else:
                                logger.info(f"{self.session_name} | <y>Task {name} not started</y>")
                        elif status == 1:
@@ -1835,7 +1837,7 @@ class Tapper:
                                logger.info(f"{self.session_name} | 🥳 Task <g>{name}</g> finished successfully")
                                claim_task = await self.claim_airdrop_task(http_client=http_client, task_id=task_id)
                                if claim_task.get('data', None) == 'ok':
-                                   logger.info(f"{self.session_name} | 🎉 Task <g>{name}</g> claimed successfully | rewarded : <g>+{reward}</g>")
+                                   logger.info(f"{self.session_name} | 🎉 Task <g>{name}</g> claimed successfully | rewarded : <g>+{reward} $TOMA</g>")
                                else:
                                    logger.info(f"{self.session_name} | <y>Task {name} not claimed</y>")
                            else:
@@ -1843,7 +1845,7 @@ class Tapper:
                        elif status == 2:
                            claim_task = await self.claim_airdrop_task(http_client=http_client, task_id=task_id)
                            if claim_task.get('data', None) == 'ok':
-                               logger.info(f"{self.session_name} | 🎉 Task <g>{name}</g> claimed successfully | rewarded : <g>+{reward}</g>")
+                               logger.info(f"{self.session_name} | 🎉 Task <g>{name}</g> claimed successfully | rewarded : <g>+{reward} $TOMA</g>")
                            else:
                                logger.info(f"{self.session_name} | <y>Task {name} not claimed</y>")
         except Exception as e:
@@ -1997,7 +1999,7 @@ class Tapper:
                     claim_token = await self.claim_token(http_client=http_client, round=round_)
                     if claim_token:
                         amount = claim_token.get('amount', None)
-                        logger.info(f"{self.session_name} | 🎉 <g>Successfully claimed weekly airdrop round {round_}</g> | rewarded : <g>{amount}</g>")
+                        logger.info(f"{self.session_name} | 🎉 <g>Successfully claimed weekly airdrop round {round_}</g> | rewarded : <g>{amount} $TOMA</g>")
                     else:
                         logger.info(f"{self.session_name} | <y>claim token failed</y>")
                 else:
@@ -2080,6 +2082,348 @@ class Tapper:
                     logger.info(f"{self.session_name} | 🎉 <g>Successfully swaped {20_000 * star} tomato</g> | rewarded : <g>+{star}</g> Star")
         except Exception as e:
             logger.warning(f"{self.session_name} | Unknown error while processing swap tomato to star : {e}", exc_info=True)
+            
+    async def get_auto_farms(
+        self, 
+        http_client: CloudflareScraper, 
+        max_retries: int = 10,
+        delay: int = 10
+    ) -> Optional[list]:
+        retries = 0
+        payload = {}
+        try:
+            while retries < max_retries:
+                async with self.lock:
+                    await http_client.options(get_auto_farms_api, headers=options_headers(method="POST", kwarg=http_client.headers), ssl=settings.ENABLE_SSL)
+                    response = await http_client.post(get_auto_farms_api, json=payload, timeout=ClientTimeout(20), ssl=settings.ENABLE_SSL)
+                    await asyncio.sleep(delay=3)
+                    if response.status == 200:
+                        response_json = await extract_json_from_response(response=response)  
+                        return response_json.get('data', [])
+                    else:
+                        retries += 1
+                        logger.warning(f"{self.session_name} | getting farm list failed: <r>{response.status}</r>, retying... (<g>{retries}</g>/<r>{max_retries}</r>)")
+                        await asyncio.sleep(delay)
+                        delay *= 2
+        except Exception as e:
+            logger.warning(f"{self.session_name} | Unknown error while getting farm list: {e}", exc_info=True)
+        return False
+    
+    async def launchpad_task_status(
+        self, 
+        http_client: CloudflareScraper, 
+        launchpad_id: int,
+        max_retries: int = 10,
+        delay: int = 10
+    ) -> Optional[list]:
+        retries = 0
+        payload = {
+            "launchpad_id": launchpad_id
+        }
+        try:
+            while retries < max_retries:
+                async with self.lock:
+                    await http_client.options(launchpad_task_status_api, headers=options_headers(method="POST", kwarg=http_client.headers), ssl=settings.ENABLE_SSL)
+                    response = await http_client.post(launchpad_task_status_api, json=payload, timeout=ClientTimeout(20), ssl=settings.ENABLE_SSL)
+                    await asyncio.sleep(delay=3)
+                    if response.status == 200:
+                        response_json = await extract_json_from_response(response=response)  
+                        return response_json.get('data', {}).get('success', False)
+                    else:
+                        retries += 1
+                        logger.warning(f"{self.session_name} | getting launchpad task status failed: <r>{response.status}</r>, retying... (<g>{retries}</g>/<r>{max_retries}</r>)")
+                        await asyncio.sleep(delay)
+                        delay *= 2
+        except Exception as e:
+            logger.warning(f"{self.session_name} | Unknown error while getting launchpad task status: {e}", exc_info=True)
+        return False
+    
+    async def launchpad_task_list(
+        self, 
+        http_client: CloudflareScraper,
+        launchpad_id: int,
+        max_retries: int = 10,
+        delay: int = 10
+    ) -> Optional[list]:
+        retries = 0
+        payload = {
+            "launchpad_id": launchpad_id
+        }
+        try:
+            while retries < max_retries:
+                async with self.lock:
+                    await http_client.options(launchpad_tasks_api, headers=options_headers(method="POST", kwarg=http_client.headers), ssl=settings.ENABLE_SSL)
+                    response = await http_client.post(launchpad_tasks_api, json=payload, timeout=ClientTimeout(20), ssl=settings.ENABLE_SSL)
+                    await asyncio.sleep(delay=3)
+                    if response.status == 200:
+                        response_json = await extract_json_from_response(response=response)  
+                        return response_json.get('data', [])
+                    else:
+                        retries += 1
+                        logger.warning(f"{self.session_name} | getting launchpad task list failed: <r>{response.status}</r>, retying... (<g>{retries}</g>/<r>{max_retries}</r>)")
+                        await asyncio.sleep(delay)
+                        delay *= 2
+        except Exception as e:
+            logger.warning(f"{self.session_name} | Unknown error while getting launchpad task list: {e}", exc_info=True)
+        return False
+
+    async def claim_launchpad_task(
+        self, 
+        http_client: CloudflareScraper, 
+        launchpad_id: int,
+        task_id: int,
+        max_retries: int = 10,
+        delay: int = 10
+    ) -> Optional[list]:
+        retries = 0
+        payload = {
+            "launchpad_id": launchpad_id,
+            "task_id": task_id
+        }
+        try:
+            while retries < max_retries:
+                async with self.lock:
+                    await http_client.options(launchpad_task_claim_api, headers=options_headers(method="POST", kwarg=http_client.headers), ssl=settings.ENABLE_SSL)
+                    response = await http_client.post(launchpad_task_claim_api, json=payload, timeout=ClientTimeout(20), ssl=settings.ENABLE_SSL)
+                    await asyncio.sleep(delay=3)
+                    if response.status == 200:
+                        response_json = await extract_json_from_response(response=response)  
+                        return response_json.get('data', {}).get('success', False)
+                    else:
+                        retries += 1
+                        logger.warning(f"{self.session_name} | claiming launchpad task failed: <r>{response.status}</r>, retying... (<g>{retries}</g>/<r>{max_retries}</r>)")
+                        await asyncio.sleep(delay)
+                        delay *= 2
+        except Exception as e:
+            logger.warning(f"{self.session_name} | Unknown error while claiming launchpad task: {e}", exc_info=True)
+        return False
+
+    async def process_launchpad_task(
+        self,
+        http_client: CloudflareScraper,
+        launchpad_id: int
+    ) -> None:
+        try:
+            launchpad_tasks = await self.launchpad_task_list(http_client=http_client, launchpad_id=launchpad_id)
+            if launchpad_tasks:
+                task_list = [
+                    task
+                    for task in launchpad_tasks
+                    if task.get("enable") is True
+                    and task.get("status", 3) == 0
+                ]
+                for task in task_list:
+                    task_id = task.get('taskId')
+                    status = task.get('status')
+                    waitSecond = task.get('waitSecond', 0)
+                    name = task.get('name', 'not found')
+
+                    if status == 0:
+                        claim_task = await self.claim_launchpad_task(http_client=http_client, task_id=task_id, launchpad_id=launchpad_id)
+                        if claim_task:
+                            logger.info(f"{self.session_name} | 🎉 Launchpad task <g>{name}</g> Completed")
+                        else:
+                            logger.info(f"{self.session_name} | <y>Task {name} not Completed</y>")   
+            else:
+                logger.info(f"{self.session_name} | <y>launchpad task not found</g>")
+        except Exception as e:
+                logger.warning(f"{self.session_name} | Unknown error while processing launchpad task : {e}", exc_info=True)
+    
+    async def invest_toma(
+        self, 
+        http_client: CloudflareScraper, 
+        launchpad_id: int,
+        amount: int,
+        max_retries: int = 10,
+        delay: int = 10
+    ) -> Optional[list]:
+        retries = 0
+        payload = {
+            "launchpad_id": launchpad_id,
+            "amount": amount
+        }
+        try:
+            while retries < max_retries:
+                async with self.lock:
+                    await http_client.options(invest_toma_api, headers=options_headers(method="POST", kwarg=http_client.headers), ssl=settings.ENABLE_SSL)
+                    response = await http_client.post(invest_toma_api, json=payload, timeout=ClientTimeout(20), ssl=settings.ENABLE_SSL)
+                    await asyncio.sleep(delay=3)
+                    if response.status == 200:
+                        response_json = await extract_json_from_response(response=response)  
+                        return response_json.get('data', {}).get('success', False)
+                    else:
+                        retries += 1
+                        logger.warning(f"{self.session_name} | staking toma failed: <r>{response.status}</r>, retying... (<g>{retries}</g>/<r>{max_retries}</r>)")
+                        await asyncio.sleep(delay)
+                        delay *= 2
+        except Exception as e:
+            logger.warning(f"{self.session_name} | Unknown error while staking toma: {e}", exc_info=True)
+        return False
+    
+    async def stake_toma(
+        self,
+        http_client: CloudflareScraper,
+        init_data: str,
+        launchpad_id: int,
+        invested_toma: int,
+        minInvest: int
+    ) -> None:
+        try:
+            if invested_toma == 0:
+                balance = await self.token_balance(http_client=http_client, init_data=init_data)
+                toma_balance = int(balance)
+            
+                if settings.STAKE_TOMA_IN_LAUNCHPOOL and toma_balance >= minInvest:
+                    amount = toma_balance if settings.STAKE_ALL_TOMA else minInvest
+                else:
+                    amount = 0
+            
+                invest_status = await self.invest_toma(http_client=http_client, launchpad_id=launchpad_id, amount=amount)
+                if invest_status and amount != 0:
+                    logger.info(f"{self.session_name} | 🎉 Total <g>{amount} $TOMA</g> staked, you will receive your $TOMA at the end of pool")
+            
+        except Exception as e:
+            logger.warning(f"{self.session_name} | Unknown error while processing stake : {e}", exc_info=True)
+    
+    async def get_launchpad_detail(
+        self, 
+        http_client: CloudflareScraper, 
+        launchpad_id: int,
+        max_retries: int = 10,
+        delay: int = 10
+    ) -> Optional[dict]:
+        retries = 0
+        payload = {
+            "launchpad_id": launchpad_id
+        }
+        try:
+            while retries < max_retries:
+                async with self.lock:
+                    await http_client.options(launchpad_detail_api, headers=options_headers(method="POST", kwarg=http_client.headers), ssl=settings.ENABLE_SSL)
+                    response = await http_client.post(launchpad_detail_api, json=payload, timeout=ClientTimeout(20), ssl=settings.ENABLE_SSL)
+                    await asyncio.sleep(delay=3)
+                    if response.status == 200:
+                        response_json = await extract_json_from_response(response=response)  
+                        return response_json.get('data', {})
+                    else:
+                        retries += 1
+                        logger.warning(f"{self.session_name} | getting launchpad details failed: <r>{response.status}</r>, retying... (<g>{retries}</g>/<r>{max_retries}</r>)")
+                        await asyncio.sleep(delay)
+                        delay *= 2
+        except Exception as e:
+            logger.warning(f"{self.session_name} | Unknown error while getting launchpad details: {e}", exc_info=True)
+        return False
+    
+    async def start_auto_farm(
+        self, 
+        http_client: CloudflareScraper, 
+        launchpad_id: int,
+        max_retries: int = 10,
+        delay: int = 10
+    ) -> Optional[list]:
+        retries = 0
+        payload = {
+            "launchpad_id": launchpad_id
+        }
+        try:
+            while retries < max_retries:
+                async with self.lock:
+                    await http_client.options(start_auto_farm_api, headers=options_headers(method="POST", kwarg=http_client.headers), ssl=settings.ENABLE_SSL)
+                    response = await http_client.post(start_auto_farm_api, json=payload, timeout=ClientTimeout(20), ssl=settings.ENABLE_SSL)
+                    await asyncio.sleep(delay=3)
+                    if response.status == 200:
+                        response_json = await extract_json_from_response(response=response)  
+                        return response_json.get('data', {})
+                    else:
+                        retries += 1
+                        logger.warning(f"{self.session_name} | starting auto farm failed: <r>{response.status}</r>, retying... (<g>{retries}</g>/<r>{max_retries}</r>)")
+                        await asyncio.sleep(delay)
+                        delay *= 2
+        except Exception as e:
+            logger.warning(f"{self.session_name} | Unknown error while starting auto farm: {e}", exc_info=True)
+        return False
+    
+    async def claim_launchpool(
+        self, 
+        http_client: CloudflareScraper, 
+        launchpad_id: int,
+        max_retries: int = 10,
+        delay: int = 10
+    ) -> Optional[list]:
+        retries = 0
+        payload = {
+            "launchpad_id": launchpad_id
+        }
+        try:
+            while retries < max_retries:
+                async with self.lock:
+                    await http_client.options(claim_auto_farms_api, headers=options_headers(method="POST", kwarg=http_client.headers), ssl=settings.ENABLE_SSL)
+                    response = await http_client.post(claim_auto_farms_api, json=payload, timeout=ClientTimeout(20), ssl=settings.ENABLE_SSL)
+                    await asyncio.sleep(delay=3)
+                    if response.status == 200:
+                        response_json = await extract_json_from_response(response=response)  
+                        return response_json.get('data', {})
+                    else:
+                        retries += 1
+                        logger.warning(f"{self.session_name} | claiming launchpad task failed: <r>{response.status}</r>, retying... (<g>{retries}</g>/<r>{max_retries}</r>)")
+                        await asyncio.sleep(delay)
+                        delay *= 2
+        except Exception as e:
+            logger.warning(f"{self.session_name} | Unknown error while claiming launchpad task: {e}", exc_info=True)
+        return False
+    
+    async def process_farmingpool(
+        self,
+        http_client: CloudflareScraper,
+        init_data: str
+    ) -> None:
+        try:
+            pool_list = await self.get_auto_farms(http_client=http_client)
+            if pool_list:
+                for pool in pool_list:
+                    isFinished = pool.get('project_farm_finished', False)
+                    if not isFinished:
+                        launchpad_id = pool.get('launchpad_id')
+                        title = pool.get('title','title not found')
+                    
+                        launchpad_detail = await self.get_launchpad_detail(http_client=http_client, launchpad_id=launchpad_id)
+                        minInvest = int(launchpad_detail.get('minInvestToma', '10000'))
+                        invested_toma = int(launchpad_detail.get('totalInvest', '0'))
+                        token_name = launchpad_detail.get('tokenName', None)
+                        await self.process_launchpad_task(http_client=http_client, launchpad_id=launchpad_id)
+                        is_task_completed = await self.launchpad_task_status(http_client=http_client, launchpad_id=launchpad_id)
+                        if is_task_completed:
+                            start_at = int(pool.get('start_at'))
+                            end_at = int(pool.get('end_at'))
+                            if start_at == 0 == end_at:
+                                await self.stake_toma(http_client=http_client, init_data=init_data, launchpad_id=launchpad_id, minInvest=minInvest, invested_toma=invested_toma)
+                                start_farm = await self.start_auto_farm(http_client=http_client, launchpad_id=launchpad_id)
+                                if start_farm:
+                                    pool_end = start_farm.get('end_at', None)
+                                    target_time = datetime.fromtimestamp(pool_end)
+                                    days, hours, minutes, seconds = time_until(target_time)
+                                    logger.info(f"{self.session_name} | 🎉 Launchpool <g>{title}</g> started | End in: <g>{days}</g> days, <g>{hours}</g> hours, <g>{minutes}</g> minutes, <g>{seconds}</g> seconds")
+                            elif int(time()) > end_at:
+                                claim_farm = await self.claim_launchpool(http_client=http_client, launchpad_id=launchpad_id)
+                                if claim_farm:
+                                    amount = claim_farm.get('cur_claimed', {}).get('total_points',0)
+                                    logger.info(f"{self.session_name} | <g>Successfully claimed {title} launchpool</g> | rewarded: <g>{amount} {token_name}</g>")
+                                    start_farm = await self.start_auto_farm(http_client=http_client, launchpad_id=launchpad_id)
+                                    if start_farm:
+                                        pool_end = start_farm.get('end_at', None)
+                                        target_time = datetime.fromtimestamp(pool_end)
+                                        days, hours, minutes, seconds = time_until(target_time)
+                                        logger.info(f"{self.session_name} | 🎉 Launchpool <g>{title}</g> started | End in: <g>{days}</g> days, <g>{hours}</g> hours, <g>{minutes}</g> minutes, <g>{seconds}</g> seconds")
+                                
+                            elif end_at > int(time()):
+                                target_time = datetime.fromtimestamp(end_at)
+                                days, hours, minutes, seconds = time_until(target_time)
+                                logger.info(f"{self.session_name} | 🌾 <g>Launchpool Farming in progress</g>, next claim in: <g>{days}</g> days, <g>{hours}</g> hours, <g>{minutes}</g> minutes, <g>{seconds}</g> seconds")
+                        else:
+                            logger.info(f"{self.session_name} | <y>launchpad task not completed</y>")
+                        
+        except Exception as e:
+            logger.warning(f"{self.session_name} | Unknown error while processing farming pool : {e}", exc_info=True)
     
     async def run(
         self, 
@@ -2176,7 +2520,8 @@ class Tapper:
                             await self.process_airdrop(http_client=http_client, init_data=tg_web_data)
                         if settings.AUTO_AIRDROP_TASK:
                             await self.process_airdrop_task(http_client=http_client, init_data=tg_web_data)
-                        
+                        if settings.PARTICIPATE_IN_FARMINGPOOL:
+                            await self.process_farmingpool(http_client=http_client, init_data=tg_web_data)
                         ### spin assets ###
                         spin_assets = await self.spin_assets(http_client=http_client, init_data=tg_web_data)
                         if spin_assets:
