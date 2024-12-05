@@ -1996,13 +1996,17 @@ class Tapper:
                 start_time = convert_utc_to_local(season_token['round'].get('startTime', '1970-01-01 00:00:00'))
                 end_time = season_token['round'].get('endTime', '9998-12-31 23:59:59')
                 current_time = int(time())
+                isClaimed = season_token.get('claimed', True)
                 if current_time >= convert_utc_to_local(end_time):
-                    claim_token = await self.claim_token(http_client=http_client, round=round_)
-                    if claim_token:
-                        amount = claim_token.get('amount', None)
-                        logger.info(f"{self.session_name} | 🎉 <g>Successfully claimed weekly airdrop round {round_}</g> | rewarded : <g>{amount} $TOMA</g>")
+                    if not isClaimed:
+                        claim_token = await self.claim_token(http_client=http_client, round=round_)
+                        if claim_token:
+                            amount = claim_token.get('amount', None)
+                            logger.info(f"{self.session_name} | 🎉 <g>Successfully claimed weekly airdrop round {round_}</g> | rewarded : <g>{amount} $TOMA</g>")
+                        else:
+                            logger.info(f"{self.session_name} | <y>claim token failed</y>")
                     else:
-                        logger.info(f"{self.session_name} | <y>claim token failed</y>")
+                        logger.info(f"{self.session_name} | <y>Weekly airdrop ended</y>")
                 else:
                     toma = round(season_token.get('toma', 0), 2)
                     stars = season_token.get('stars', None)
