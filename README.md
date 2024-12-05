@@ -27,7 +27,9 @@
 | Auto upgrade rank                 |     ✅     |
 | Auto claim treasure box           |     ✅     |
 | Auto swap tomato to star          |     ✅     |
+| Auto participate in farmingpool   |     ✅     |
 | Advanced anti-detection           |     ✅     |
+| `socks` and `http` proxy supported|     ✅     |
 
 ---
 
@@ -50,6 +52,9 @@
 | **AUTO_CLAIM_WEEKLY_AIRDROP** | Automatically claim weekly airdrop rewards.                                                         | `True`                 |
 | **AUTO_CLAIM_TREASURE**  | Automatically claim treasure rewards.                                                                    | `True`                 |
 | **AUTO_SWAP_TOMATO_TO_STAR** | Automatically swap in-game tomatoes to stars for upgrades.                                           | `True`                 |
+| **PARTICIPATE_IN_FARMINGPOOL** | Automatically participate in the farming pool.                                                     | `True`                 |
+| **STAKE_TOMA_IN_LAUNCHPOOL** | Automatically stake TOMA in the launch pool.                                                         | `True`                 |
+| **STAKE_ALL_TOMA**           | Automatically stake all TOMA tokens.                                                                 | `False`                |
 | **AUTO_PLAY_GAME**       | Automatically play drop game for rewards.                                                                | `True`                 |
 | **GAME_PLAY_EACH_ROUND** | Number of rounds to play for each game session.                                                          | `[2, 10]`              |
 | **MIN_POINTS**           | Minimum points to play during a game session.                                                            | `400`                  |
@@ -57,6 +62,7 @@
 | **REF_ID**               | Referral link ID for user registration.                                                                  | ``                     |
 | **SAVE_JS_FILES**        | Save JavaScript files for debugging or analysis (experimental).                                          | `False`                |
 | **ADVANCED_ANTI_DETECTION** | Enable advanced anti-detection measures to avoid account bans.                                        | `True`                 |
+| **ENABLE_SSL**           | Enable SSL for secure connections.                                                                       | `True`                 |
 | **USE_PROXY_FROM_FILE**  | Use proxies from `proxies.txt`.                                                                          | `False`                |
 ---
 
