@@ -10,7 +10,6 @@ from bot.core.tapper import run_tapper, run_tapper_synchronous
 from bot.core.registrator import register_sessions, get_tg_client
 from bot.utils.accounts import Accounts
 from better_proxy import Proxy
-from art import tprint 
 from bot.utils.proxy import get_proxy
 
 __version__ = "1.0"
