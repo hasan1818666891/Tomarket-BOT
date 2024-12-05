@@ -31,14 +31,16 @@ class Settings(BaseSettings):
     AUTO_CLAIM_TREASURE: bool = True
     AUTO_SWAP_TOMATO_TO_STAR: bool = True
     
+    PARTICIPATE_IN_FARMINGPOOL: bool = True
+    STAKE_TOMA_IN_LAUNCHPOOL: bool = True
+    STAKE_ALL_TOMA: bool = False
+    
     AUTO_PLAY_GAME: bool = True
     GAME_PLAY_EACH_ROUND: list[int] = [2, 5]
     MIN_POINTS: int = 400
     MAX_POINTS: int = 460
     
     REF_ID: str = '0000A4cW'
-    
-    ENABLE_SSL: bool = True
     
     DISABLED_TASKS: list[str] = [
                         'medal_donate', 
@@ -57,7 +59,7 @@ class Settings(BaseSettings):
     
     SAVE_JS_FILES: bool = False # Experimental `True`
     ADVANCED_ANTI_DETECTION: bool = True
-    
+    ENABLE_SSL: bool = True
     USE_PROXY_FROM_FILE: bool = False
 
 settings = Settings()
