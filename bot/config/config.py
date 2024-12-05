@@ -58,7 +58,7 @@ class Settings(BaseSettings):
                     ] 
     
     SAVE_JS_FILES: bool = False # Experimental `True`
-    ADVANCED_ANTI_DETECTION: bool = True
+    ADVANCED_ANTI_DETECTION: bool = False
     ENABLE_SSL: bool = True
     USE_PROXY_FROM_FILE: bool = False
 
