@@ -1,5 +1,6 @@
 import sys
 from loguru import logger
+from datetime import timedelta
 import os
 
 os.makedirs("logs", exist_ok=True)
@@ -16,15 +17,17 @@ logger.add(
 logger.add(
     "logs/app.log",
     rotation="1 MB",
-    retention="3 days",
-    format="{time:YYYY-MM-DD HH:mm:ss} | {level: <8} | {message}"
+    retention=timedelta(days=3),
+    format="{time:YYYY-MM-DD HH:mm:ss} | {level: <8} | {message}",
+    # diagnose=True
 )
 
 logger.add(
     "logs/debug.log",
     level="DEBUG",
     rotation="1 MB",
-    retention="7 days"
+    retention=timedelta(days=7),
+    # diagnose=True
 )
 
 logger = logger.opt(colors=True)
