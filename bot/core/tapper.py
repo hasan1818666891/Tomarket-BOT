@@ -7,7 +7,8 @@ from urllib.parse import unquote, quote
 from datetime import datetime, timedelta
 from typing import Any, Callable, Optional
 from aiocfscrape import CloudflareScraper
-from aiohttp_proxy import ProxyConnector
+from aiohttp_proxy import ProxyConnector as http_connector
+from aiohttp_socks import ProxyConnector as socks_connector
 from random import randint, choices, uniform, choices
 from aiohttp import ClientSession, ClientTimeout, ClientConnectorError
 
@@ -2435,7 +2436,12 @@ class Tapper:
             logger.info(f"{self.session_name} | 🕚 wait <c>{random_delay}</c> second before starting...")
             await asyncio.sleep(random_delay)
 
-        proxy_conn = ProxyConnector().from_url(proxy) if proxy else None
+        if 'socks' in str(proxy):
+            proxy_conn = socks_connector().from_url(proxy)
+        elif 'http' in str(proxy):
+            proxy_conn = http_connector().from_url(proxy)
+        else:
+            proxy_conn = None
         headers = get_headers()
         headers["User-Agent"] = user_agent
         chrome_ver = extract_chrome_version(user_agent=headers['User-Agent']).split('.')[0]
