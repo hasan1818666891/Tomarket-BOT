@@ -2230,7 +2230,7 @@ class Tapper:
                         else:
                             logger.info(f"{self.session_name} | <y>Task {name} not Completed</y>")   
             else:
-                logger.info(f"{self.session_name} | <y>launchpad task not found</g>")
+                logger.info(f"{self.session_name} | <y>launchpad task not found</y>")
         except Exception as e:
                 logger.warning(f"{self.session_name} | Unknown error while processing launchpad task : {e}", exc_info=True)
     
