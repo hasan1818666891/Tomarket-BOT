@@ -12,7 +12,7 @@ from bot.utils.accounts import Accounts
 from better_proxy import Proxy
 from bot.utils.proxy import get_proxy
 
-__version__ = "1.0"
+__version__ = "1.1"
 start_text = f"""
 
 \x1b[38;5;125m _____   ___   __  __     _     ____   _  __ _____  _____   \x1b[0m
