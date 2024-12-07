@@ -33,7 +33,7 @@ API_ENDPOINTS = [
     r'online:\s*["\']https://api-web.tomarket.ai/tomarket-game/v1["\']',
     r'test:\s*["\']https://api-gateway-go-web.bitkeep.zone/tomarket-game/v1["\']',
     r'beta:\s*["\']https://api-gateway-web.bknode.vip/tomarket-game/v1["\']',
-    r'const\s*RT\s*=\s*["\']online["\']',
+    r'const\s*OT\s*=\s*["\']online["\']',
     r'drop:\s*["\']59bcd12e-04e2-404c-a172-311a0084587d["\']',
     r'daily:\s*["\']fa873d13-d831-4d6f-8aee-9cff7a1d0db1["\']',
     r'farm:\s*["\']53b22103-c7ff-413d-bc63-20f6fb806a07["\']',
