@@ -699,7 +699,7 @@ class Tapper:
                 async with self.lock:
                     await http_client.options(task_check_api, headers=options_headers(method="POST", kwarg=http_client.headers), ssl=settings.ENABLE_SSL)
                     response = await http_client.post(task_check_api, json=payload, timeout=ClientTimeout(20), ssl=settings.ENABLE_SSL)
-                    await asyncio.sleep(delay=6)
+                    await asyncio.sleep(delay=4)
                     if response.status == 200:
                         response_json = await extract_json_from_response(response=response)
                         data = response_json.get('data', {})
