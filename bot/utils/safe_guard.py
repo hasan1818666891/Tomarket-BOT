@@ -2,6 +2,7 @@ import os
 import re
 import json
 import jsbeautifier
+import subprocess
 import cloudscraper
 from datetime import datetime
 from requests.exceptions import Timeout, ConnectionError, SSLError, HTTPError, RequestException
@@ -123,7 +124,7 @@ async def check_base_url(session_name):
             logger.warning("Could not find any main.js format. Dumping page content for inspection:")
             try:
                 response = session.get(base_url)
-                print(response.text[:1000])
+                logger.info(response.text[:1000])
                 return False
             except Exception as e:
                 logger.error(f"Error fetching the base URL for content dump: {e}")
@@ -262,3 +263,23 @@ async def save_js_files(js_paths):
         await download_file(full_url, save_directory)
 
     await clean_up_old_files(save_directory, max_files=10)
+
+def check_for_updates():
+    try:
+        result = subprocess.run(["git", "fetch"], stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+        output = result.stdout.strip()
+        
+        logger.info("Checking for updates...")
+        status_result = subprocess.run(["git", "status"], stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+        status_output = status_result.stdout.strip()
+
+        if "Your branch is behind" in status_output:
+            logger.info("<g>New update available!</g> Use `git pull`")
+            
+            return True
+        else:
+            logger.info("No updates available.")
+            return False
+    except Exception as e:
+        logger.info(f"Error checking for updates: {e}")
+        return False
