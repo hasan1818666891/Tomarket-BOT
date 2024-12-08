@@ -32,7 +32,7 @@ class Settings(BaseSettings):
     AUTO_SWAP_TOMATO_TO_STAR: bool = False
     
     PARTICIPATE_IN_FARMINGPOOL: bool = True
-    STAKE_TOMA_IN_LAUNCHPOOL: bool = True
+    STAKE_TOMA_IN_LAUNCHPOOL: bool = False
     STAKE_ALL_TOMA: bool = False
     
     AUTO_PLAY_GAME: bool = True
