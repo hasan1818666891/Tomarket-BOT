@@ -1021,7 +1021,7 @@ class Tapper:
                         response_json = await extract_json_from_response(response=response)
                         data = response_json.get('data', None)
                         if data and str(data) == "ok":
-                            logger.info(f"{self.session_name} | ➦ <g>game shared successfully</g>")
+                            logger.info(f"{self.session_name} | ➦ <g>game shared successfully</g> | rewarded: <g>+50 </g>tomato")
                         return True
                     else:
                         retries += 1
@@ -2386,7 +2386,7 @@ class Tapper:
             pool_list = await self.get_auto_farms(http_client=http_client)
             if pool_list:
                 for pool in pool_list:
-                    isFinished = pool.get('project_farm_finished', False)
+                    isFinished = pool.get('finish', True)
                     if not isFinished:
                         launchpad_id = pool.get('launchpad_id')
                         title = pool.get('title','title not found')
