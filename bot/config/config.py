@@ -61,6 +61,6 @@ class Settings(BaseSettings):
     ADVANCED_ANTI_DETECTION: bool = False
     ENABLE_SSL: bool = True
     USE_PROXY_FROM_FILE: bool = False
-    GIT_UPDATE_CHECKER: bool = True
+    GIT_UPDATE_CHECKER: bool = False
 
 settings = Settings()
