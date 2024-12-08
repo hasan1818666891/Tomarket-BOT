@@ -24,12 +24,12 @@ class Settings(BaseSettings):
     
     AUTO_SPIN: bool = True
     
-    AUTO_CLAIM_AIRDROP: bool = True
+    AUTO_CLAIM_AIRDROP: bool = False
     AIRDROP_SEASON: str = 'One'
-    AUTO_AIRDROP_TASK: bool = True
-    AUTO_CLAIM_WEEKLY_AIRDROP: bool = True
+    AUTO_AIRDROP_TASK: bool = False
+    AUTO_CLAIM_WEEKLY_AIRDROP: bool = False
     AUTO_CLAIM_TREASURE: bool = True
-    AUTO_SWAP_TOMATO_TO_STAR: bool = True
+    AUTO_SWAP_TOMATO_TO_STAR: bool = False
     
     PARTICIPATE_IN_FARMINGPOOL: bool = True
     STAKE_TOMA_IN_LAUNCHPOOL: bool = True
