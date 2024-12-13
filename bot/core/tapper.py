@@ -923,7 +923,7 @@ class Tapper:
                                     message += f"| rewarded: <g>{score}</g> tomato " if score != 0 else ''
                                     message += f"- <g>{games}</g> game " if games != 0 else ''
                                     message += f"- <g>{star}</g> star" if star != 0 else ''
-                                    logger.info(f"{self.session_name} | 🎉 <g>Puzzle solved successfully </g>{message}")
+                                    logger.info(f"{self.session_name} | 🎉 <g>Puzzle solved successfully</g> | Combo: <g>{combo}</g> | {message}")
                                 elif "message" in claim.keys():
                                     logger.info(f"{self.session_name} | <y>puzzle not solved, first complete youtube task</y>")
                                 else:
