@@ -919,8 +919,7 @@ class Tapper:
                             if isinstance(claim, dict):
                                 if claim == {}:
                                     message = ""
-                                
-                                    message += f"| rewarded: <g>{score}</g> tomato " if score != 0 else ''
+                                    message += f"rewarded: <g>{score}</g> tomato " if score != 0 else ''
                                     message += f"- <g>{games}</g> game " if games != 0 else ''
                                     message += f"- <g>{star}</g> star" if star != 0 else ''
                                     logger.info(f"{self.session_name} | 🎉 <g>Puzzle solved successfully</g> | Combo: <g>{combo}</g> | {message}")
