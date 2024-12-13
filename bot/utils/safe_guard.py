@@ -32,7 +32,6 @@ session.headers.update({
 BASE_PAGE_URL = "https://mini-app.tomarket.ai/"
 DETECTION_CONFIG_URL = "https://raw.githubusercontent.com/khondokerXhasan/bin/refs/heads/main/detect.json"
 API_ENDPOINTS = [
-    r'avoid script untill listing',
     r'online:\s*["\']https://api-web.tomarket.ai/tomarket-game/v1["\']',
     r'test:\s*["\']https://api-gateway-go-web.bitkeep.zone/tomarket-game/v1["\']',
     r'beta:\s*["\']https://api-gateway-web.bknode.vip/tomarket-game/v1["\']',
