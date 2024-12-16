@@ -2519,16 +2519,8 @@ class Tapper:
                             await self.process_spin(http_client=http_client, init_data=tg_web_data)
                         if settings.AUTO_RANK_UPGRADE:
                             await self.process_upgrade(http_client=http_client, init_data=tg_web_data)
-                        if settings.AUTO_CLAIM_TREASURE:
-                            await self.process_treasure(http_client=http_client, init_data=tg_web_data)
                         if settings.AUTO_SWAP_TOMATO_TO_STAR:
                             await self.process_swap_tomato(http_client=http_client, init_data=tg_web_data)
-                        if settings.AUTO_CLAIM_WEEKLY_AIRDROP:
-                            await self.process_weekly_airdrop(http_client=http_client, init_data=tg_web_data)
-                        if settings.AUTO_CLAIM_AIRDROP:
-                            await self.process_airdrop(http_client=http_client, init_data=tg_web_data)
-                        if settings.AUTO_AIRDROP_TASK:
-                            await self.process_airdrop_task(http_client=http_client, init_data=tg_web_data)
                         if settings.PARTICIPATE_IN_FARMINGPOOL:
                             await self.process_farmingpool(http_client=http_client, init_data=tg_web_data)
                         ### spin assets ###
