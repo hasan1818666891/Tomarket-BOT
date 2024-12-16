@@ -13,9 +13,6 @@ class Settings(BaseSettings):
     AUTO_FARMING: bool = True
     AUTO_TASK: bool = True
     
-    JOIN_TG_CHANNELS: bool = False
-    ARCHIVE_CHANNELS: bool = False
-    
     AUTO_ADD_WALLET: bool = False
     
     AUTO_SOLVE_PUZZLE: bool = True
@@ -24,11 +21,8 @@ class Settings(BaseSettings):
     
     AUTO_SPIN: bool = True
     
-    AUTO_CLAIM_AIRDROP: bool = False
-    AIRDROP_SEASON: str = 'One'
-    AUTO_AIRDROP_TASK: bool = False
-    AUTO_CLAIM_WEEKLY_AIRDROP: bool = False
-    AUTO_CLAIM_TREASURE: bool = True
+    AIRDROP_SEASON: str = "One"
+    
     AUTO_SWAP_TOMATO_TO_STAR: bool = False
     
     PARTICIPATE_IN_FARMINGPOOL: bool = True
