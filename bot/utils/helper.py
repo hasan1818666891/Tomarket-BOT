@@ -67,7 +67,7 @@ async def generate_ton_wallet(session_name: str) -> dict | bool:
         wallet_address = wallet.address.to_string(True, True, False)
 
         # Return all wallet credentials in a dictionary
-        return True, {
+        return {
             "mnemonic": " ".join(mnemonics),
             "wallet_address": wallet_address,
             "private_key": private_key.hex(),
@@ -76,11 +76,11 @@ async def generate_ton_wallet(session_name: str) -> dict | bool:
 
     except ModuleNotFoundError:
         logger.error(f"<light-yellow>{session_name}</light-yellow> | Error: The tonsdk library is not installed or not found.")
-        return None, {}
+        return None
     except Exception as e:
         logger.error(f"<light-yellow>{session_name}</light-yellow> | Unknown error when generating wallets: {e}")
         await asyncio.sleep(delay=3)
-        return None, {}
+        return None
 
 async def configure_wallet(
     tg_id: str, 
@@ -96,8 +96,8 @@ async def configure_wallet(
         if tg_id in list(wallets_json_file.keys()):
             wallet_address = wallets_json_file[tg_id]['wallet'].get('wallet_address')
         else:
-            status, wallet_data = await generate_ton_wallet(session_name)
-            if status and wallet_data != {}:
+            wallet_data = await generate_ton_wallet(session_name)
+            if wallet_data:
                 wallets_json_file[tg_id]={
                     "wallet": wallet_data,
                     "session_name": f"{session_name}.session",
