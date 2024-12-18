@@ -85,13 +85,14 @@ async def generate_ton_wallet(session_name: str) -> dict | bool:
 async def configure_wallet(
     tg_id: str, 
     tg_username: str, 
-    session_name: str
+    session_name: str,
+    file_name: str = "wallets.json"
 ) -> str | bool:
     try:
-        if not os.path.exists("wallets.json"):
-            with open("wallets.json", "w") as f:
+        if not os.path.exists(file_name):
+            with open(file_name, "w") as f:
                     json.dump({}, f, indent=4)
-        with open("wallets.json", "r") as f:
+        with open(file_name, "r") as f:
             wallets_json_file = json.load(f)
         if tg_id in list(wallets_json_file.keys()):
             wallet_address = wallets_json_file[tg_id]['wallet'].get('wallet_address')
@@ -103,7 +104,7 @@ async def configure_wallet(
                     "session_name": f"{session_name}.session",
                     "username": tg_username
                 }
-                with open('wallets.json', 'w') as file:
+                with open(file_name, 'w') as file:
                     json.dump(wallets_json_file, file, indent=4)
                 wallet_address = wallet_data['wallet_address']
                 logger.info(f"{session_name} | <g>New Ton wallet generated and saved it to</g> <c>wallets.json</c>")
