@@ -37,7 +37,7 @@ async def extract_json_from_response(response):
 
 @cached(ttl=3600, cache=Cache.MEMORY)  # Cache combo.json file for 1 hour
 async def get_combo() -> dict:
-    url = 'https://raw.githubusercontent.com/boytegar/TomarketBOT/refs/heads/master/combo.json'
+    url = 'https://raw.githubusercontent.com/khondokerXhasan/bin/refs/heads/main/combo.json'
     try:
         async with aiohttp.ClientSession() as session:
             async with session.get(url) as response:
