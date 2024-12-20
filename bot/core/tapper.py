@@ -81,7 +81,7 @@ launchpad_toma_balance_api = f"{BASE_API}/launchpad/tomaBalance"
 invest_toma_api = f"{BASE_API}/launchpad/investToma"
 start_auto_farm_api = f"{BASE_API}/launchpad/startAutoFarm"
 claim_auto_farms_api = f"{BASE_API}/launchpad/claimAutoFarm"
-
+sybil_api = f"{BASE_API}/user/isSybil"
 
 GAME_ID = {
     "daily": "fa873d13-d831-4d6f-8aee-9cff7a1d0db1",
@@ -103,6 +103,7 @@ class Tapper:
         self.peer = None
         self.airdrop_season = settings.AIRDROP_SEASON
         self.lock = asyncio.Lock()
+        self.isSybil = False
     
     async def get_tg_web_data(
         self, 
@@ -316,17 +317,18 @@ class Tapper:
     ) -> bool:
         async with self.tg_client:
             try:
-                me = await self.tg_client.get_me()
-                first_name = me.first_name
-                last_name = me.last_name if me.last_name else ''
-                tg_name = f"{me.first_name or ''} {me.last_name or ''}".strip()
+                async with self.lock:
+                    me = await self.tg_client.get_me()
+                    first_name = me.first_name
+                    last_name = me.last_name if me.last_name else ''
+                    tg_name = f"{me.first_name or ''} {me.last_name or ''}".strip()
                 
-                if symbol not in tg_name:
-                    changed_name = f'{first_name}{symbol}'
-                    await self.tg_client.update_profile(first_name=changed_name)
-                    logger.info(f"{self.session_name} | First name changed <g>{first_name}</g> to <g>{changed_name}</g>")
-                    await asyncio.sleep(delay=randint(20, 30))
-                return True
+                    if symbol not in tg_name:
+                        changed_name = f'{first_name}{symbol}'
+                        await self.tg_client.update_profile(first_name=changed_name)
+                        logger.info(f"{self.session_name} | First name changed <g>{first_name}</g> to <g>{changed_name}</g>")
+                        await asyncio.sleep(delay=randint(20, 30))
+                    return True
             except Exception as error:
                 logger.error(f"<light-yellow>{self.session_name}</light-yellow> | Error while changing tg name : {error}")
                 return False
@@ -2046,6 +2048,38 @@ class Tapper:
             logger.warning(f"{self.session_name} | Unknown error while getting tomatoes : {e}", exc_info=True)
         return False
 
+    async def detect_cheating(
+        self, 
+        http_client: CloudflareScraper, 
+        init_data: str,
+        max_retries: int = 10,
+        delay: int = 10
+    ) -> Optional[dict]:
+        retries = 0
+        payload = {
+            "language_code": "en",
+            "init_data": init_data
+        }
+        try:
+            while retries < max_retries:
+                async with self.lock:
+                    await http_client.options(sybil_api, headers=options_headers(method="POST", kwarg=http_client.headers), ssl=settings.ENABLE_SSL)
+                    response = await http_client.post(sybil_api, json=payload, timeout=ClientTimeout(20), ssl=settings.ENABLE_SSL)
+                    await asyncio.sleep(delay=3)
+                    if response.status == 200:
+                        response_json = await extract_json_from_response(response=response)
+                        data = response_json.get('data', {})
+                        self.isSybil = bool(data.get("isSybil", False))
+                        return True
+                    else:
+                        retries += 1
+                        logger.warning(f"{self.session_name} | checking sybil failed: <r>{response.status}</r>, retying... (<g>{retries}</g>/<r>{max_retries}</r>)")
+                        await asyncio.sleep(delay)
+                        delay *= 2
+        except Exception as e:
+            logger.warning(f"{self.session_name} | Unknown error while checking sybil : {e}", exc_info=True)
+        return False
+
     async def swap_tomato(
         self, 
         http_client: CloudflareScraper, 
@@ -2482,14 +2516,15 @@ class Tapper:
                             continue
 
                         http_client.headers['Authorization'] = f"{self.access_token}"
-
+                        
                         await self.claim_daily(http_client=http_client)
-
+                        await self.detect_cheating(http_client=http_client, init_data=tg_web_data)
+                        
                         get_balance = await self.get_balance(http_client=http_client)
                         if get_balance:
                             balance = get_balance.get("available_balance", None)
                             play_pass = get_balance.get("play_passes", None)
-                            logger.info(f"{self.session_name} | Balance: <g>{balance}</g> - Play pass: <g>{play_pass}</g>")
+                            logger.info(f"{self.session_name} | Balance: <g>{balance}</g> - Play pass: <g>{play_pass}</g> - Cheater: <m>{self.isSybil}</m>")
 
                         await self.process_wallet_task(http_client=http_client, init_data=tg_web_data)
                         if settings.AUTO_FARMING:
@@ -2522,7 +2557,10 @@ class Tapper:
                         if settings.AUTO_SWAP_TOMATO_TO_STAR:
                             await self.process_swap_tomato(http_client=http_client, init_data=tg_web_data)
                         if settings.PARTICIPATE_IN_FARMINGPOOL:
-                            await self.process_farmingpool(http_client=http_client, init_data=tg_web_data)
+                            if not self.isSybil:
+                                await self.process_farmingpool(http_client=http_client, init_data=tg_web_data)
+                            else:
+                                logger.info(f"{self.session_name} | You cann't participate in farmingpool because you are suspended")
                         ### spin assets ###
                         spin_assets = await self.spin_assets(http_client=http_client, init_data=tg_web_data)
                         if spin_assets:
