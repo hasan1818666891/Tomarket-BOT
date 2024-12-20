@@ -5,6 +5,7 @@ from ua_generator.data.version import VersionRange
 
 # Mapping of Android versions to SDK versions
 ANDROID_SDK_MAPPING = {
+    "14": 34,
     "13": 33,
     "12": 31,
     "11": 30,
