@@ -20,7 +20,7 @@ DEFAULT_CHROME_VERSION = "118.0.5993.156"
 DEFAULT_SDK_VERSION = 28
 
 # Default app version and name
-DEFAULT_APP_VERSION = "11.4.2"
+DEFAULT_APP_VERSION = "11.5.4"
 DEFAULT_APP_NAME = "Telegram-Android"
 
 def generate_random_user_agent(device_type='android', browser_type='chrome') -> str:
