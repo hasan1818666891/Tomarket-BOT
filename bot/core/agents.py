@@ -24,13 +24,16 @@ DEFAULT_SDK_VERSION = 28
 DEFAULT_APP_VERSION = "11.5.4"
 DEFAULT_APP_NAME = "Telegram-Android"
 
+
 def generate_random_user_agent(device_type='android', browser_type='chrome') -> str:
     chrome_version_range = VersionRange(min_version=117, max_version=131)
     options = Options(version_ranges={'chrome': chrome_version_range})
-    ua = ua_generator.generate(platform=device_type, browser=browser_type, options=options)
+    ua = ua_generator.generate(
+        platform=device_type, browser=browser_type, options=options)
     normal_user_agent = ua.text
     app_user_agent = generate_app_user_agent(normal_user_agent)
     return app_user_agent
+
 
 def extract_chrome_version(user_agent) -> str:
     # Extract the Chrome version from the user agent
@@ -40,22 +43,26 @@ def extract_chrome_version(user_agent) -> str:
     else:
         return DEFAULT_CHROME_VERSION  # Use default if Chrome version is not found
 
+
 def generate_app_user_agent(normal_user_agent, app_version=DEFAULT_APP_VERSION, app_name=DEFAULT_APP_NAME) -> str:
     device_info_match = re.search(r"\(([^)]+)\)", normal_user_agent)
-    
+
     if device_info_match:
         device_info = device_info_match.group(1)
         parts = device_info.split("; ")
 
-        android_version = parts[1].split(" ")[1] if len(parts) > 1 else DEFAULT_ANDROID_VERSION
-        device_model = parts[2].split(" ")[0] if len(parts) > 2 else DEFAULT_DEVICE_MODEL
+        android_version = parts[1].split(" ")[1] if len(
+            parts) > 1 else DEFAULT_ANDROID_VERSION
+        device_model = parts[2].split(" ")[0] if len(
+            parts) > 2 else DEFAULT_DEVICE_MODEL
 
         # Special handling for Samsung devices
         if device_model.startswith("SM-"):
             device_model = "Samsung " + device_model
 
         android_version_major = android_version.split(".")[0]
-        sdk_version = ANDROID_SDK_MAPPING.get(android_version_major, DEFAULT_SDK_VERSION)
+        sdk_version = ANDROID_SDK_MAPPING.get(
+            android_version_major, DEFAULT_SDK_VERSION)
 
         chrome_version = extract_chrome_version(normal_user_agent)
 

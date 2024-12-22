@@ -3,5 +3,115 @@
     "session_name": "name_example",
     "user_agent": "Mozilla/5.0 (Linux; Android 9; Samsung SM-G892A) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/118.0.5993.156 Mobile Safari/537.36 Telegram-Android/11.3.4 (Samsung SM-G892A; Android 9; SDK 28; AVERAGE)",
     "proxy": "type://user:pass:ip:port"
+  },
+  {
+    "session_name": "+8801604368362",
+    "user_agent": "Mozilla/5.0 (Linux; Android 14; K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/118.0.5993.93 Mobile Safari/537.36 Telegram-Android/11.5.4 (Samsung SM-G313U; Android 14; SDK 28; AVERAGE)",
+    "proxy": null
+  },
+  {
+    "session_name": "tg 1778",
+    "user_agent": "Mozilla/5.0 (Linux; Android 13; K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.6045.218 Mobile Safari/537.36 Telegram-Android/11.5.4 (Samsung SM-G996B; Android 13; SDK 33; AVERAGE)",
+    "proxy": null
+  },
+  {
+    "session_name": "+8801780238237",
+    "user_agent": "Mozilla/5.0 (Linux; Android 12; K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0.6723.235 Mobile Safari/537.36 Telegram-Android/11.5.4 (Samsung SM-G530W; Android 12; SDK 31; AVERAGE)",
+    "proxy": null
+  },
+  {
+    "session_name": "447398563726",
+    "user_agent": "Mozilla/5.0 (Linux; Android 10; K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.6367.54 Mobile Safari/537.36 Telegram-Android/11.5.4 (Samsung SM-G986W; Android 10; SDK 29; AVERAGE)",
+    "proxy": null
+  },
+  {
+    "session_name": "abbu",
+    "user_agent": "Mozilla/5.0 (Linux; Android 10; K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/129.0.6668.115 Mobile Safari/537.36 Telegram-Android/11.5.4 (Samsung SM-G925X; Android 10; SDK 29; AVERAGE)",
+    "proxy": null
+  },
+  {
+    "session_name": "abbu3",
+    "user_agent": "Mozilla/5.0 (Linux; Android 9; K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.6367.54 Mobile Safari/537.36 Telegram-Android/11.5.4 (Samsung SM-G930FD; Android 9; SDK 28; AVERAGE)",
+    "proxy": null
+  },
+  {
+    "session_name": "ammu",
+    "user_agent": "Mozilla/5.0 (Linux; Android 8; K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/118.0.5993.93 Mobile Safari/537.36 Telegram-Android/11.5.4 (Samsung SM-G928N; Android 8; SDK 26; AVERAGE)",
+    "proxy": null
+  },
+  {
+    "session_name": "bmmarshal",
+    "user_agent": "Mozilla/5.0 (Linux; Android 8; K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.6367.54 Mobile Safari/537.36 Telegram-Android/11.5.4 (Samsung SM-G310H; Android 8; SDK 26; AVERAGE)",
+    "proxy": null
+  },
+  {
+    "session_name": "dipa",
+    "user_agent": "Mozilla/5.0 (Linux; Android 9; K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/117.0.5938.205 Mobile Safari/537.36 Telegram-Android/11.5.4 (Samsung SM-G313HZ; Android 9; SDK 28; AVERAGE)",
+    "proxy": null
+  },
+  {
+    "session_name": "its_me",
+    "user_agent": "Mozilla/5.0 (Linux; Android 14; K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/129.0.6668.115 Mobile Safari/537.36 Telegram-Android/11.5.4 (Samsung SM-G3568V; Android 14; SDK 28; AVERAGE)",
+    "proxy": null
+  },
+  {
+    "session_name": "nabil",
+    "user_agent": "Mozilla/5.0 (Linux; Android 12; K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.6261.24 Mobile Safari/537.36 Telegram-Android/11.5.4 (Samsung SM-G3502C; Android 12; SDK 31; AVERAGE)",
+    "proxy": null
+  },
+  {
+    "session_name": "riya",
+    "user_agent": "Mozilla/5.0 (Linux; Android 14; K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/117.0.5938.205 Mobile Safari/537.36 Telegram-Android/11.5.4 (Samsung SM-G970U1; Android 14; SDK 28; AVERAGE)",
+    "proxy": null
+  },
+  {
+    "session_name": "sister1",
+    "user_agent": "Mozilla/5.0 (Linux; Android 9; K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.6613.221 Mobile Safari/537.36 Telegram-Android/11.5.4 (Samsung SM-G935F; Android 9; SDK 28; AVERAGE)",
+    "proxy": null
+  },
+  {
+    "session_name": "sister2",
+    "user_agent": "Mozilla/5.0 (Linux; Android 12; K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0.6723.235 Mobile Safari/537.36 Telegram-Android/11.5.4 (Samsung SM-G935VC; Android 12; SDK 31; AVERAGE)",
+    "proxy": null
+  },
+  {
+    "session_name": "sorifpogo",
+    "user_agent": "Mozilla/5.0 (Linux; Android 12; K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/117.0.5938.205 Mobile Safari/537.36 Telegram-Android/11.5.4 (Samsung SM-G780F; Android 12; SDK 31; AVERAGE)",
+    "proxy": null
+  },
+  {
+    "session_name": "abbu2",
+    "user_agent": "Mozilla/5.0 (Linux; Android 12; K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.6613.221 Mobile Safari/537.36 Telegram-Android/11.5.4 (Pixel; Android 12; SDK 31; AVERAGE)",
+    "proxy": null
+  },
+  {
+    "session_name": "tg 177",
+    "user_agent": "Mozilla/5.0 (Linux; Android 10; K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.6478.121 Mobile Safari/537.36 Telegram-Android/11.5.4 (Pixel; Android 10; SDK 29; AVERAGE)",
+    "proxy": null
+  },
+  {
+    "session_name": "tg 178",
+    "user_agent": "Mozilla/5.0 (Linux; Android 12; K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/118.0.5993.93 Mobile Safari/537.36 Telegram-Android/11.5.4 (Samsung SM-G870A; Android 12; SDK 31; AVERAGE)",
+    "proxy": null
+  },
+  {
+    "session_name": "tg180",
+    "user_agent": "Mozilla/5.0 (Linux; Android 8; K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.6167.128 Mobile Safari/537.36 Telegram-Android/11.5.4 (Samsung SM-G930R4; Android 8; SDK 26; AVERAGE)",
+    "proxy": null
+  },
+  {
+    "session_name": "tg181",
+    "user_agent": "Mozilla/5.0 (Linux; Android 9; K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/127.0.6533.29 Mobile Safari/537.36 Telegram-Android/11.5.4 (Samsung SM-G313HZ; Android 9; SDK 28; AVERAGE)",
+    "proxy": null
+  },
+  {
+    "session_name": "tg182",
+    "user_agent": "Mozilla/5.0 (Linux; Android 13; K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.6422.192 Mobile Safari/537.36 Telegram-Android/11.5.4 (Samsung SM-G9208; Android 13; SDK 33; AVERAGE)",
+    "proxy": null
+  },
+  {
+    "session_name": "khondoker",
+    "user_agent": "Mozilla/5.0 (Linux; Android 10; K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.6261.24 Mobile Safari/537.36 Telegram-Android/11.5.4 (Samsung SM-G532MT; Android 10; SDK 29; AVERAGE)",
+    "proxy": null
   }
 ]

@@ -30,7 +30,7 @@ class Accounts:
             for file in os.listdir(self.workdir)
             if file.endswith(".session")
         ]
-        #logger.info(f"Searched sessions: <g>{len(sessions)}</g>")
+        # logger.info(f"Searched sessions: <g>{len(sessions)}</g>")
         return sessions
 
     def get_available_accounts(self, sessions: list) -> list:
@@ -39,10 +39,12 @@ class Accounts:
         accounts_from_json = load_from_json(accounts_file)
 
         if not accounts_from_json:
-            raise ValueError("Can't run script | Please add accounts in sessions/accounts.json")
+            raise ValueError(
+                "Can't run script | Please add accounts in sessions/accounts.json")
 
         # Track used proxies to avoid duplicates
-        used_proxies = [account["proxy"] for account in accounts_from_json if account["proxy"]]
+        used_proxies = [account["proxy"]
+                        for account in accounts_from_json if account["proxy"]]
 
         accounts_from_json_filtered = [
             account for account in accounts_from_json if account["session_name"] != "name_example"
@@ -53,10 +55,12 @@ class Accounts:
         # Check proxy-session length mismatch
         proxies = get_proxies() if settings.USE_PROXY_FROM_FILE else []
         if settings.USE_PROXY_FROM_FILE and len(proxies) != len(sessions):
-            logger.warning(f"Proxy count (<g>{len(proxies)}</g>) does not match session count (<g>{len(sessions)}</g>).")
+            logger.warning(
+                f"Proxy count (<g>{len(proxies)}</g>) does not match session count (<g>{len(sessions)}</g>).")
 
         for session in sessions:
-            account = next((acc for acc in accounts_from_json_filtered if acc["session_name"] == session), None)
+            account = next(
+                (acc for acc in accounts_from_json_filtered if acc["session_name"] == session), None)
 
             if account:
                 # Update proxy if required
@@ -66,12 +70,14 @@ class Accounts:
                         account["proxy"] = unused_proxy
                         used_proxies.append(unused_proxy)
                     else:
-                        logger.warning(f"No unused proxies available for session: {session}")
+                        logger.warning(
+                            f"No unused proxies available for session: {session}")
                 elif not settings.USE_PROXY_FROM_FILE:
                     account["proxy"] = None
             else:
                 # Create a new account entry for missing sessions
-                user_agent = generate_random_user_agent(device_type='android', browser_type='chrome')
+                user_agent = generate_random_user_agent(
+                    device_type='android', browser_type='chrome')
                 proxy = None
                 if settings.USE_PROXY_FROM_FILE:
                     proxy = self.get_unused_proxy(used_proxies)
@@ -89,7 +95,7 @@ class Accounts:
             available_accounts.append(account)
 
         # Save updated accounts to the JSON file
-        save_to_json(accounts_file,accounts_from_json)
+        save_to_json(accounts_file, accounts_from_json)
 
         return available_accounts
 
@@ -99,8 +105,10 @@ class Accounts:
         available_accounts = self.get_available_accounts(sessions)
 
         if not available_accounts:
-            raise ValueError("Available accounts not found! Please add accounts in the 'sessions' folder")
+            raise ValueError(
+                "Available accounts not found! Please add accounts in the 'sessions' folder")
         else:
-            logger.success(f"Available accounts: <g>{len(available_accounts)}</g>")
+            logger.success(
+                f"Available accounts: <g>{len(available_accounts)}</g>")
 
         return available_accounts

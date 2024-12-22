@@ -15,14 +15,16 @@ def get_headers() -> dict:
         'priority': "u=1, i"
     }
 
+
 def options_headers(
-    method: str, 
+    method: str,
     kwarg: dict = None
 ) -> dict:
     if kwarg is None:
         kwarg = {}
 
-    excluded_keys = {'sec-ch-ua', 'sec-ch-ua-mobile', 'sec-ch-ua-platform', 'content-type', 'accept', 'authorization'}
+    excluded_keys = {'sec-ch-ua', 'sec-ch-ua-mobile',
+                     'sec-ch-ua-platform', 'content-type', 'accept', 'authorization'}
     kwarg = {k: v for k, v in kwarg.items() if k.lower() not in excluded_keys}
 
     return {

@@ -11,6 +11,7 @@ from bot.core.registrator import register_sessions, get_tg_client
 from bot.utils.accounts import Accounts
 from better_proxy import Proxy
 from bot.utils.proxy import get_proxy
+from bot.utils.safe_guard import check_for_updates
 
 __version__ = "1.1"
 start_text = f"""
@@ -28,12 +29,15 @@ Select an action:
     1. Run bot
     2. Create session
 """
+if settings.GIT_UPDATE_CHECKER:
+    check_for_updates()
+
 
 async def process() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("-a", "--action", type=int, help="Action to perform")
-    parser.add_argument("-m", "--multithread", type=str, help="Enable multi-threading")
-    
+    parser.add_argument("-m", "--multithread", type=str,
+                        help="Enable multi-threading")
 
     action = parser.parse_args().action
     ans = parser.parse_args().multithread
@@ -57,7 +61,8 @@ async def process() -> None:
     elif action == 1:
         if ans is None:
             while True:
-                ans = input("> Do you want to run the bot with multi-thread? (y/n) : ").strip()
+                ans = input(
+                    "> Do you want to run the bot with multi-thread? (y/n) : ").strip()
                 if ans not in ["y", "n"]:
                     logger.warning("Answer must be y or n")
                 else:
@@ -66,12 +71,11 @@ async def process() -> None:
         if ans == "y":
             accounts = await Accounts().get_accounts()
             await run_tasks(accounts=accounts)
-        
+
         else:
             accounts = await Accounts().get_accounts()
             await run_tapper_synchronous(accounts=accounts)
-            
-            
+
 
 async def run_tasks(accounts: [Any, Any, list]):
     tasks = []
@@ -82,11 +86,11 @@ async def run_tasks(accounts: [Any, Any, list]):
         tasks.append(
             asyncio.create_task(
                 run_tapper(
-                    tg_client=tg_client, 
-                    user_agent=user_agent, 
+                    tg_client=tg_client,
+                    user_agent=user_agent,
                     proxy=proxy
                 )
             )
-        )     
+        )
 
     await asyncio.gather(*tasks)

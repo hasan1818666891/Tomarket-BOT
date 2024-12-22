@@ -18,12 +18,14 @@ async def register_sessions() -> None:
     if not session_name:
         return None
 
-    raw_proxy = str(input("Input the proxy in the format type://user:pass@ip:port (press Enter to use without proxy): ")).strip()
+    raw_proxy = str(input(
+        "Input the proxy in the format type://user:pass@ip:port (press Enter to use without proxy): ")).strip()
 
     accounts_data = load_from_json('sessions/accounts.json')
 
     # Create the session details
-    user_agent = generate_random_user_agent(device_type='android', browser_type='chrome')
+    user_agent = generate_random_user_agent(
+        device_type='android', browser_type='chrome')
     session_info = {
         "session_name": session_name,
         "user_agent": user_agent,
@@ -41,7 +43,8 @@ async def register_sessions() -> None:
     async with session:
         user_data = await session.get_me()
 
-    logger.success(f'Session added successfully @{user_data.username} | {user_data.first_name} {user_data.last_name}')
+    logger.success(
+        f'Session added successfully @{user_data.username} | {user_data.first_name} {user_data.last_name}')
 
 
 async def get_tg_client(session_name: str, proxy: str | None) -> Client:

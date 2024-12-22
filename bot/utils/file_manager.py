@@ -4,6 +4,7 @@ import os
 from bot.config import settings
 from bot.utils import logger
 
+
 def load_from_json(path: str):
 
     if os.path.isfile(path):
@@ -13,9 +14,11 @@ def load_from_json(path: str):
                 if isinstance(data, list):  # Ensure it's a list
                     return data
                 else:
-                    logger.warning("Invalid JSON structure. Resetting to default.")
+                    logger.warning(
+                        "Invalid JSON structure. Resetting to default.")
             except json.JSONDecodeError:
-                logger.warning("Empty or invalid JSON file. Resetting to default.")
+                logger.warning(
+                    "Empty or invalid JSON file. Resetting to default.")
 
     example = [{
         "session_name": "name_example",
@@ -26,8 +29,8 @@ def load_from_json(path: str):
         json.dump(example, file, ensure_ascii=False, indent=2)
     return example
 
+
 def save_to_json(path: str, data: list):
 
     with open(path, 'w', encoding="utf-8") as file:
         json.dump(data, file, ensure_ascii=False, indent=2)
-
