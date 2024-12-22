@@ -1,5 +1,5 @@
 .env
-sessions/
+sessions/*
 .idea/
 __pycache__
 *.session
