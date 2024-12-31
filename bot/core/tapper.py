@@ -2331,7 +2331,7 @@ class Tapper:
     ) -> None:
         try:
             tomato = await self.tomatoes(http_client=http_client, init_data=init_data)
-            balance = int(tomato.get('balance', 0))
+            balance = int(float(tomato.get('balance', 0)))
             if balance >= 20_000:
                 star = round(balance / 20_000)
                 swap_me = await self.swap_tomato(http_client=http_client)

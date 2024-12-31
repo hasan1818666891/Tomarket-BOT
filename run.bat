@@ -1,5 +1,5 @@
 @echo off
-title CatsGangBot
+title Tomarket-BOT
 if not exist venv (
     echo Creating virtual environment...
     python -m venv venv
