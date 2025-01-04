@@ -163,7 +163,7 @@ def convert_utc_to_local(iso_time):
         unix_time = int(local_dt.timestamp())
         return unix_time
     except Exception as e:
-        logger.error(f"Error converting time: {e}, iso_time: {iso_time}")
+        print(f"Error converting time: {e}, iso_time: {iso_time}")
         return None
 
 

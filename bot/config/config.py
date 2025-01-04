@@ -24,7 +24,8 @@ class Settings(BaseSettings):
     AIRDROP_SEASON: str = "One"
 
     AUTO_SWAP_TOMATO_TO_STAR: bool = False
-
+    AUTO_CLAIM_WEEKLY_AIRDROP: bool = True
+    
     PARTICIPATE_IN_FARMINGPOOL: bool = True
     STAKE_TOMA_IN_LAUNCHPOOL: bool = False
     STAKE_ALL_TOMA: bool = False

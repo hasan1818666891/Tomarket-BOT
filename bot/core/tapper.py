@@ -68,7 +68,8 @@ airdrop_task_claim_api = f"{BASE_API}/token/claimTask"
 treasure_status_api = f"{BASE_API}/invite/isTreasureBoxOpen"
 treasure_open_api = f"{BASE_API}/invite/openTreasureBox"
 treasure_balance_api = f"{BASE_API}/invite/queryTreasureBoxBalance"
-season_token_api = f"{BASE_API}/token/season"
+weekly_token_api = f"{BASE_API}/token/weeks"
+weekly_airdrop_api = f"{BASE_API}/token/weeklyAirdrop"
 tomatoes_api = f"{BASE_API}/token/tomatoes"
 swap_tomato_api = f"{BASE_API}/token/tomatoToStar"
 
@@ -2160,7 +2161,40 @@ class Tapper:
             logger.warning(
                 f"{self.session_name} | Unknown error while processing treasure task : {e}", exc_info=True)
 
-    async def get_season_token(
+    async def get_weekly_token(
+        self,
+        http_client: CloudflareScraper,
+        init_data: str,
+        max_retries: int = 10,
+        delay: int = 10
+    ) -> Optional[dict]:
+        retries = 0
+        payload = {
+            "language_code": "en",
+            "init_data": init_data,
+            "is_biweek": True
+        }
+        try:
+            while retries < max_retries:
+                async with self.lock:
+                    await http_client.options(weekly_token_api, headers=options_headers(method="POST", kwarg=http_client.headers), ssl=settings.ENABLE_SSL)
+                    response = await http_client.post(weekly_token_api, json=payload, timeout=ClientTimeout(20), ssl=settings.ENABLE_SSL)
+                    await asyncio.sleep(delay=3)
+                    if response.status == 200:
+                        response_json = await extract_json_from_response(response=response)
+                        return response_json.get('data', [])[0]
+                    else:
+                        retries += 1
+                        logger.warning(
+                            f"{self.session_name} | getting weekly token failed: <r>{response.status}</r>, retying... (<g>{retries}</g>/<r>{max_retries}</r>)")
+                        await asyncio.sleep(delay)
+                        delay *= 2
+        except Exception as e:
+            logger.warning(
+                f"{self.session_name} | Unknown error while getting weekly token : {e}", exc_info=True)
+        return False
+    
+    async def get_weekly_airdrop(
         self,
         http_client: CloudflareScraper,
         init_data: str,
@@ -2175,8 +2209,8 @@ class Tapper:
         try:
             while retries < max_retries:
                 async with self.lock:
-                    await http_client.options(season_token_api, headers=options_headers(method="POST", kwarg=http_client.headers), ssl=settings.ENABLE_SSL)
-                    response = await http_client.post(season_token_api, json=payload, timeout=ClientTimeout(20), ssl=settings.ENABLE_SSL)
+                    await http_client.options(weekly_airdrop_api, headers=options_headers(method="POST", kwarg=http_client.headers), ssl=settings.ENABLE_SSL)
+                    response = await http_client.post(weekly_airdrop_api, json=payload, timeout=ClientTimeout(20), ssl=settings.ENABLE_SSL)
                     await asyncio.sleep(delay=3)
                     if response.status == 200:
                         response_json = await extract_json_from_response(response=response)
@@ -2184,29 +2218,57 @@ class Tapper:
                     else:
                         retries += 1
                         logger.warning(
-                            f"{self.session_name} | getting season token failed: <r>{response.status}</r>, retying... (<g>{retries}</g>/<r>{max_retries}</r>)")
+                            f"{self.session_name} | getting weekly token failed: <r>{response.status}</r>, retying... (<g>{retries}</g>/<r>{max_retries}</r>)")
                         await asyncio.sleep(delay)
                         delay *= 2
         except Exception as e:
             logger.warning(
-                f"{self.session_name} | Unknown error while getting season token : {e}", exc_info=True)
+                f"{self.session_name} | Unknown error while getting weekly token : {e}", exc_info=True)
         return False
-
+    
     async def process_weekly_airdrop(
         self,
         http_client: CloudflareScraper,
         init_data: str
     ) -> None:
         try:
-            season_token = await self.get_season_token(http_client=http_client, init_data=init_data)
-            if season_token:
-                round_ = season_token['round'].get('name', 'Not found')
-                start_time = convert_utc_to_local(
-                    season_token['round'].get('startTime', '1970-01-01 00:00:00'))
-                end_time = season_token['round'].get(
-                    'endTime', '9998-12-31 23:59:59')
-                current_time = int(time())
-                isClaimed = season_token.get('claimed', True)
+            weekly_token = await self.get_weekly_token(http_client=http_client, init_data=init_data)
+            if weekly_token:
+                round_ = weekly_token['round'].get('name', 'Not found')
+                
+                isClaimed = weekly_token.get('claimed', True)
+                
+                if not isClaimed:
+                    claim_token = await self.claim_token(http_client=http_client, round=round_)
+                    if claim_token:
+                        amount = claim_token.get('amount', None)
+                        logger.info(
+                            f"{self.session_name} | 🎉 <g>Successfully claimed weekly airdrop round {round_}</g> | rewarded : <g>{amount} $TOMA</g>")
+                    else:
+                        logger.info(
+                            f"{self.session_name} | <y>claim token failed</y>")
+                else:
+                    
+                    weekly_airdrop = await self.get_weekly_airdrop(http_client=http_client, init_data=init_data)
+                    if weekly_airdrop:
+                        if weekly_airdrop.get("isCurrent", False):
+                            currentRound = weekly_airdrop.get('currentRound', {})
+                            start_time = convert_utc_to_local(
+                                currentRound.get('startTime', '1970-01-01 00:00:00'))
+                            end_time = convert_utc_to_local(
+                                currentRound.get('endTime', '9998-12-31 23:59:59'))
+                            current_time = int(time())
+                            target_time = datetime.fromtimestamp(end_time)
+                            days, hours, minutes, seconds = time_until(target_time)
+                            logger.info(f"{self.session_name} | Weekly round: <g>{weekly_airdrop.get('name')}</g> | End in: <g>{days}</g> days, <g>{hours}</g> hours, <g>{minutes}</g> minutes, <g>{seconds}</g> seconds")
+                        else:
+                            logger.info(
+                                f"{self.session_name} | <y>something wrong in weekly</y> | response: {weekly_airdrop}")
+                    else:
+                        logger.info(
+                            f"{self.session_name} | <y>weekly airdrop not found</y>")
+                
+                """
                 if current_time >= convert_utc_to_local(end_time):
                     if not isClaimed:
                         claim_token = await self.claim_token(http_client=http_client, round=round_)
@@ -2221,13 +2283,15 @@ class Tapper:
                         logger.info(
                             f"{self.session_name} | <y>Weekly airdrop ended</y>")
                 else:
-                    toma = round(season_token.get('toma', 0), 2)
-                    stars = season_token.get('stars', None)
+                    toma = round(weekly_token.get('toma', 0), 2)
+                    stars = weekly_token.get('stars', None)
                     timestamp_end = convert_utc_to_local(end_time)
                     target_time = datetime.fromtimestamp(timestamp_end)
                     days, hours, minutes, seconds = time_until(target_time)
                     logger.info(f"{self.session_name} | Weekly round: <g>{round_}</g> | Claimable: <g>{toma}</g> $TOMA - <g>{stars}</g> Stars | End in: <g>{days}</g> days, <g>{hours}</g> hours, <g>{minutes}</g> minutes, <g>{seconds}</g> seconds")
+                """
         except Exception as e:
+            traceback.print_exc()
             logger.warning(
                 f"{self.session_name} | Unknown error while processing weekly airdrop : {e}", exc_info=True)
 
@@ -2827,12 +2891,19 @@ class Tapper:
                             await self.process_upgrade(http_client=http_client, init_data=tg_web_data)
                         if settings.AUTO_SWAP_TOMATO_TO_STAR:
                             await self.process_swap_tomato(http_client=http_client, init_data=tg_web_data)
+                        if settings.AUTO_CLAIM_WEEKLY_AIRDROP:
+                            if not self.isSybil:
+                                await self.process_weekly_airdrop(http_client=http_client, init_data=tg_web_data)
+                            else:
+                                logger.info(
+                                    f"{self.session_name} | Cheating Detected. Your cannot participate weekly airdrop")
+                            
                         if settings.PARTICIPATE_IN_FARMINGPOOL:
                             if not self.isSybil:
                                 await self.process_farmingpool(http_client=http_client, init_data=tg_web_data)
                             else:
                                 logger.info(
-                                    f"{self.session_name} | You cann't participate in farmingpool because you are suspended")
+                                    f"{self.session_name} | Cheating Detected. Your cannot participate in farmingpool")
                         ### spin assets ###
                         spin_assets = await self.spin_assets(http_client=http_client, init_data=tg_web_data)
                         if spin_assets:
