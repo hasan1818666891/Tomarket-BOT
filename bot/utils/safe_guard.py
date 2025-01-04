@@ -68,6 +68,7 @@ API_ENDPOINTS = [
     r'/launchpad/detail',
     r'/launchpad/tomaBalance',
     r'/launchpad/startAutoFarm',
+    r'/token/weeklyAirdrop'
 ]
 
 
