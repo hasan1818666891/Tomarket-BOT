@@ -76,7 +76,7 @@ async def fetch_js_paths(base_url):
     try:
         response = session.get(base_url)
         response.raise_for_status()
-        pattern = r'src="(/.*?/index.*?\.js)"'
+        pattern = r'src="(/assets/index.*?\.js)"'
         matches = re.findall(pattern, response.text)
         return matches
     except Exception as e:
@@ -128,7 +128,7 @@ async def check_base_url(session_name):
                 "Could not find any main.js format. Dumping page content for inspection:")
             try:
                 response = session.get(base_url)
-                logger.info(response.text[:1000])
+                print(response.text[:1000])
                 return False
             except Exception as e:
                 logger.error(
