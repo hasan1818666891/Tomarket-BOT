@@ -43,7 +43,6 @@ API_ENDPOINTS = [
     r'/daily/claim',
     r'/tasks/walletTask',
     r'/tasks/address',
-    r'/tasks/address',
     r'/user/balance',
     r'/tasks/list',
     r'/tasks/start',
@@ -51,24 +50,17 @@ API_ENDPOINTS = [
     r'/tasks/claim',
     r'/tasks/puzzle',
     r'/tasks/puzzleClaim',
-    r'/game/share',
     r'/spin/show',
     r'/spin/free',
     r'/spin/once',
     r'/spin/raffle',
     r'/user/tickets',
     r'/spin/assets',
-    r'/token/check',
-    r'/token/balance',
-    r'/token/airdropTasks',
-    r'/token/weeks',
-    r'/token/tomatoes',
     r'/launchpad/tasks',
     r'/launchpad/taskClaim',
     r'/launchpad/detail',
     r'/launchpad/tomaBalance',
     r'/launchpad/startAutoFarm',
-    r'/token/weeklyAirdrop'
 ]
 
 

@@ -35,7 +35,7 @@ class Settings(BaseSettings):
     MIN_POINTS: int = 400
     MAX_POINTS: int = 460
 
-    REF_ID: str = '0000A4cW'
+    REF_ID: str = '0003b4Ov'
 
     DISABLED_TASKS: list[str] = [
         'medal_donate',

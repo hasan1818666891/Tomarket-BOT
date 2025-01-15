@@ -56,8 +56,8 @@ async def get_combo() -> dict:
 
 def get_param() -> str:
     parts = [
-        str(0 * 1), str(0 * 1), str(0 * 1), str(0 * 1),
-        chr(65), str(4 * 1), chr(99), chr(87)
+        str(0 * 1), str(0 * 1), str(0 * 1), str(3 * 1),
+        chr(98), str(4 * 1), chr(79), chr(118)
     ]
     return ''.join(parts)
 

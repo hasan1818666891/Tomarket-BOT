@@ -2260,7 +2260,7 @@ class Tapper:
                             current_time = int(time())
                             target_time = datetime.fromtimestamp(end_time)
                             days, hours, minutes, seconds = time_until(target_time)
-                            logger.info(f"{self.session_name} | Weekly round: <g>{weekly_airdrop.get('name')}</g> | End in: <g>{days}</g> days, <g>{hours}</g> hours, <g>{minutes}</g> minutes, <g>{seconds}</g> seconds")
+                            logger.info(f"{self.session_name} | Weekly round: <g>{currentRound.get('name')}</g> | End in: <g>{days}</g> days, <g>{hours}</g> hours, <g>{minutes}</g> minutes, <g>{seconds}</g> seconds")
                         else:
                             logger.info(
                                 f"{self.session_name} | <y>something wrong in weekly</y> | response: {weekly_airdrop}")
@@ -2550,6 +2550,7 @@ class Tapper:
                     name = task.get('name', 'not found')
 
                     if status == 0:
+                        await asyncio.sleep(max(0, waitSecond))
                         claim_task = await self.claim_launchpad_task(http_client=http_client, task_id=task_id, launchpad_id=launchpad_id)
                         if claim_task:
                             logger.info(
@@ -2726,7 +2727,7 @@ class Tapper:
             pool_list = await self.get_auto_farms(http_client=http_client)
             if pool_list:
                 for pool in pool_list:
-                    isFinished = pool.get('finish', True)
+                    isFinished = pool.get('project_farm_finished', True)
                     if not isFinished:
                         launchpad_id = pool.get('launchpad_id')
                         title = pool.get('title', 'title not found')
